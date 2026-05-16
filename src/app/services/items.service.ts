@@ -195,7 +195,29 @@ export class ItemsService {
   }
 
   getVariants(_userId: number): Observable<{ success: boolean; variants: ItemVariant[] }> {
-    return of({ success: true, variants: [] });
+    return of({ success: true, variants: [
+      { variantId: 2,  variantName: 'Phone Call',          itemTypeId: 1,  itemType: 'Activity' },
+      { variantId: 3,  variantName: 'Visit',               itemTypeId: 1,  itemType: 'Activity' },
+      { variantId: 4,  variantName: 'Meeting',             itemTypeId: 1,  itemType: 'Activity' },
+      { variantId: 5,  variantName: 'Online Meeting',      itemTypeId: 1,  itemType: 'Activity' },
+      { variantId: 6,  variantName: 'Schedule',            itemTypeId: 1,  itemType: 'Activity' },
+      { variantId: 7,  variantName: 'Personal',            itemTypeId: 3,  itemType: 'Contact' },
+      { variantId: 8,  variantName: 'Emergency',           itemTypeId: 3,  itemType: 'Contact' },
+      { variantId: 16, variantName: 'ID Document',         itemTypeId: 4,  itemType: 'Document' },
+      { variantId: 17, variantName: 'General Document',    itemTypeId: 4,  itemType: 'Document' },
+      { variantId: 23, variantName: 'Bank Credentials',    itemTypeId: 5,  itemType: 'Credentials' },
+      { variantId: 24, variantName: 'App / Web',           itemTypeId: 5,  itemType: 'Credentials' },
+      { variantId: 27, variantName: 'Service Entity',      itemTypeId: 8,  itemType: 'Entity' },
+      { variantId: 28, variantName: 'Business',            itemTypeId: 8,  itemType: 'Entity' },
+      { variantId: 29, variantName: 'Govt Organisation',   itemTypeId: 8,  itemType: 'Entity' },
+      { variantId: 30, variantName: 'Location / Place',    itemTypeId: 9,  itemType: 'Location' },
+      { variantId: 31, variantName: 'Prompt',              itemTypeId: 10, itemType: 'Knowledge' },
+      { variantId: 32, variantName: 'Idea',                itemTypeId: 10, itemType: 'Knowledge' },
+      { variantId: 33, variantName: 'Memory',              itemTypeId: 10, itemType: 'Knowledge' },
+      { variantId: 35, variantName: 'Address',             itemTypeId: 9,  itemType: 'Location' },
+      { variantId: 36, variantName: 'Task',                itemTypeId: 2,  itemType: 'Task' },
+      { variantId: 37, variantName: 'Expenses / Receipts', itemTypeId: 12, itemType: 'Money' },
+    ]});
   }
 
   getContactPhones(_userId: number, contactItemId: number): Observable<{ success: boolean; phones: PhoneModel[] }> {
