@@ -1,0 +1,124 @@
+.lists-container {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a237e;
+  }
+
+  .count-badge {
+    background: #e8eaf6;
+    color: #1a237e;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+}
+
+.search-field {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 20px;
+}
+
+.lists-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-card {
+  border-radius: 12px !important;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(26,35,126,0.12) !important;
+    transform: translateY(-1px);
+  }
+
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px !important;
+  }
+
+  .list-icon {
+    width: 44px;
+    height: 44px;
+    background: #e8eaf6;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    mat-icon { color: #1a237e; }
+  }
+
+  .list-info {
+    flex: 1;
+
+    .list-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+
+    .list-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #888;
+
+      span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        mat-icon { font-size: 14px; width: 14px; height: 14px; }
+      }
+    }
+  }
+
+  .arrow-icon { color: #ccc; }
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  gap: 16px;
+  color: #888;
+}
+
+.error-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #ffebee;
+  color: #c62828;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px;
+  color: #aaa;
+  mat-icon { font-size: 56px; width: 56px; height: 56px; }
+  h3 { color: #666; margin: 12px 0 4px; }
+  p { margin: 0; font-size: 14px; }
+}

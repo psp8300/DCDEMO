@@ -1,0 +1,97 @@
+<mat-sidenav-container class="app-container">
+
+  <!-- Sidebar -->
+  <mat-sidenav mode="side" opened class="sidenav">
+    <div class="sidenav-header">
+      <div class="logo">DC</div>
+      <span class="app-name">DClutter</span>
+    </div>
+
+    <mat-nav-list>
+      <mat-list-item
+        *ngFor="let item of menuItems"
+        [class.active]="activeMenu === item.id"
+        (click)="navigate(item)">
+        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+        <span matListItemTitle>{{ item.label }}</span>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- Main Content -->
+  <mat-sidenav-content class="main-content">
+
+    <!-- Top Toolbar -->
+    <mat-toolbar class="toolbar">
+      <span class="page-title">{{ activeMenu | titlecase }}</span>
+      <span class="spacer"></span>
+      <button mat-icon-button [matMenuTriggerFor]="userMenu">
+        <div class="avatar">{{ getInitials() }}</div>
+      </button>
+      <mat-menu #userMenu="matMenu">
+        <div class="user-menu-header">
+          <strong>{{ user?.displayName }}</strong>
+          <small>{{ user?.email }}</small>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon> Sign Out
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <!-- Dashboard Content -->
+    <div class="content-area" *ngIf="activeMenu === 'dashboard'">
+      <h2 class="welcome">Welcome back, {{ user?.displayName }}!</h2>
+
+      <!-- Stat Cards -->
+      <div class="stats-grid">
+        <mat-card class="stat-card" *ngFor="let stat of stats">
+          <mat-card-content>
+            <div class="stat-icon" [style.background]="stat.color">
+              <mat-icon>{{ stat.icon }}</mat-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ stat.value }}</div>
+              <div class="stat-label">{{ stat.label }}</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Quick Actions -->
+      <mat-card class="quick-actions-card">
+        <mat-card-header>
+          <mat-card-title>Quick Actions</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="actions-grid">
+            <button mat-stroked-button (click)="navigate({id:'lists', route:'/lists'})">
+              <mat-icon>list_alt</mat-icon> My Lists
+            </button>
+            <button mat-stroked-button (click)="navigate({id:'items', route:'/items'})">
+              <mat-icon>inventory_2</mat-icon> Browse Items
+            </button>
+            <button mat-stroked-button (click)="navigate({id:'activity', route:'/activity'})">
+              <mat-icon>history</mat-icon> View Activity
+            </button>
+            <button mat-stroked-button (click)="navigate({id:'schedule', route:null})">
+              <mat-icon>event</mat-icon> Schedule
+            </button>
+            <button mat-stroked-button (click)="navigate({id:'settings', route:null})">
+              <mat-icon>settings</mat-icon> Settings
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Placeholder for other sections -->
+    <div class="content-area coming-soon" *ngIf="activeMenu !== 'dashboard'">
+      <mat-icon class="big-icon">construction</mat-icon>
+      <h2>{{ activeMenu | titlecase }}</h2>
+      <p>This section is coming soon.</p>
+    </div>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>

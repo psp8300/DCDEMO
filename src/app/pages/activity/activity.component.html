@@ -1,0 +1,48 @@
+<div class="activity-container">
+
+  <div class="page-header">
+    <h2>Activity Log</h2>
+    <span class="count-badge" *ngIf="!loading">{{ activities.length }} entries</span>
+  </div>
+
+  <div class="centered" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading activity...</p>
+  </div>
+
+  <div class="error-box" *ngIf="error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <div class="timeline" *ngIf="!loading && !error">
+    <div class="timeline-item" *ngFor="let item of activities">
+      <div class="timeline-dot"></div>
+      <mat-card class="activity-card">
+        <mat-card-content>
+          <div class="activity-header">
+            <span class="activity-id">Activity #{{ item.activityId }}</span>
+            <span class="activity-date">
+              <mat-icon>calendar_today</mat-icon>
+              {{ formatDate(item.date) }}
+            </span>
+          </div>
+          <div class="activity-notes" *ngIf="item.notes">{{ item.notes }}</div>
+          <div class="activity-footer">
+            <span class="duration" *ngIf="item.durationMinutes">
+              <mat-icon>timer</mat-icon> {{ formatDuration(item.durationMinutes) }}
+            </span>
+            <span class="created-at">Logged: {{ formatDate(item.createdAt) }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="empty-state" *ngIf="activities.length === 0">
+      <mat-icon>history</mat-icon>
+      <h3>No activity yet</h3>
+      <p>Your activity log will appear here</p>
+    </div>
+  </div>
+
+</div>

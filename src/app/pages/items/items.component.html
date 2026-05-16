@@ -1,0 +1,104 @@
+<div class="items-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <button mat-icon-button (click)="goHome()" class="back-btn" matTooltip="Back to Home">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-text">
+      <h2>Items</h2>
+      <span class="count-badge" *ngIf="!loading">{{ totalCount | number }} items</span>
+    </div>
+    <span class="spacer"></span>
+    <button mat-flat-button color="primary" class="create-btn" (click)="openCreateItem()">
+      <mat-icon>add</mat-icon> New Item
+    </button>
+  </div>
+
+  <!-- Search Bar -->
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Search items...</mat-label>
+    <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearch($event)" />
+    <mat-icon matPrefix>search</mat-icon>
+    <button *ngIf="searchTerm" matSuffix mat-icon-button (click)="searchTerm=''; onSearch('')">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <!-- Type Filter Chips -->
+  <div class="type-filters" *ngIf="!typesLoading">
+    <button
+      class="type-chip"
+      [class.active]="selectedTypeId === null"
+      (click)="selectType(null)">
+      <mat-icon>apps</mat-icon> All
+    </button>
+    <button
+      *ngFor="let t of itemTypes"
+      class="type-chip"
+      [class.active]="selectedTypeId === t.itemTypeId"
+      (click)="selectType(t.itemTypeId)">
+      <mat-icon>{{ typeIcon(t.itemType) }}</mat-icon>
+      {{ t.itemType }}
+      <span class="chip-count">{{ t.count }}</span>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="centered" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading items...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box" *ngIf="error && !loading">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Items Grid -->
+  <div class="items-grid" *ngIf="!loading && !error">
+
+    <mat-card class="item-card" *ngFor="let item of items">
+      <mat-card-content>
+        <div class="item-type-badge">
+          <mat-icon>{{ typeIcon(item.itemTypeName) }}</mat-icon>
+          <span>{{ item.itemTypeName || 'Unknown' }}</span>
+        </div>
+        <div class="item-title" [matTooltip]="getItemLabel(item)">
+          {{ getItemLabel(item) }}
+        </div>
+        <div class="item-sub" *ngIf="getItemSub(item)">
+          {{ getItemSub(item) }}
+        </div>
+        <div class="item-footer">
+          <span class="item-id">#{{ item.itemId }}</span>
+          <span class="item-date">
+            <mat-icon>event</mat-icon>
+            {{ formatDate(item.lastUpdatedDate || item.createdDate) }}
+          </span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="items.length === 0">
+      <mat-icon>inventory_2</mat-icon>
+      <h3>No items found</h3>
+      <p *ngIf="searchTerm || selectedTypeId">Try adjusting your search or filter.</p>
+      <p *ngIf="!searchTerm && !selectedTypeId">No items have been created yet.</p>
+    </div>
+  </div>
+
+  <!-- Paginator -->
+  <mat-paginator
+    *ngIf="!loading && totalCount > pageSize"
+    [length]="totalCount"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="[25, 50, 100]"
+    [pageIndex]="currentPage"
+    (page)="onPageChange($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+
+</div>

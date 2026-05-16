@@ -1,0 +1,46 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <div class="dialog-title"><mat-icon style="color:#6a1b9a">description</mat-icon><span>New Document</span></div>
+    <button mat-icon-button (click)="cancel()"><mat-icon>close</mat-icon></button>
+  </div>
+  <div class="dialog-body">
+    <div class="variant-row">
+      <button *ngFor="let v of variants" class="var-chip" [class.active]="selected.id===v.id"
+        [style.--vc]="v.color" (click)="selected=v">
+        <mat-icon>{{ v.icon }}</mat-icon> {{ v.name }}
+      </button>
+    </div>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Document Name *</mat-label>
+      <input matInput [(ngModel)]="name" placeholder="e.g. Aadhaar Card, Passport, Degree Certificate…" />
+      <mat-icon matPrefix>badge</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Document Number</mat-label>
+      <input matInput [(ngModel)]="docNumber" placeholder="XXXX-XXXX-XXXX" />
+      <mat-icon matPrefix>tag</mat-icon>
+    </mat-form-field>
+    <div class="row-2">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Issued Date</mat-label>
+        <input matInput [(ngModel)]="issuedDate" type="date" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Expiry Date</mat-label>
+        <input matInput [(ngModel)]="expiryDate" type="date" />
+      </mat-form-field>
+    </div>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Issuing Authority</mat-label>
+      <input matInput [(ngModel)]="authority" placeholder="e.g. UIDAI, Passport Office…" />
+      <mat-icon matPrefix>account_balance</mat-icon>
+    </mat-form-field>
+  </div>
+  <div class="dialog-actions">
+    <button mat-stroked-button (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="!canSave||saving" (click)="save()">
+      <mat-spinner *ngIf="saving" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+      <mat-icon *ngIf="!saving">save</mat-icon> {{ saving ? 'Saving…' : 'Save' }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <div class="dialog-title"><mat-icon style="color:#e65100">payments</mat-icon><span>New Expense</span></div>
+    <button mat-icon-button (click)="cancel()"><mat-icon>close</mat-icon></button>
+  </div>
+  <div class="dialog-body">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description *</mat-label>
+      <input matInput [(ngModel)]="description" placeholder="e.g. Lunch, Cab to airport, Monthly rent…" />
+      <mat-icon matPrefix>receipt_long</mat-icon>
+    </mat-form-field>
+    <div class="row-2">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Amount (₹)</mat-label>
+        <input matInput [(ngModel)]="amount" type="number" placeholder="0.00" />
+        <mat-icon matPrefix>currency_rupee</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Date</mat-label>
+        <input matInput [(ngModel)]="date" type="date" />
+      </mat-form-field>
+    </div>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Merchant / Paid To</mat-label>
+      <input matInput [(ngModel)]="merchant" placeholder="e.g. Swiggy, DMart…" />
+      <mat-icon matPrefix>store</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Category</mat-label>
+      <input matInput [(ngModel)]="category" placeholder="e.g. Food, Transport, Rent…" />
+      <mat-icon matPrefix>category</mat-icon>
+    </mat-form-field>
+  </div>
+  <div class="dialog-actions">
+    <button mat-stroked-button (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="!canSave||saving" (click)="save()">
+      <mat-spinner *ngIf="saving" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+      <mat-icon *ngIf="!saving">save</mat-icon> {{ saving ? 'Saving…' : 'Save Expense' }}
+    </button>
+  </div>
+</div>

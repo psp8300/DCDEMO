@@ -1,0 +1,69 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <div class="dialog-title">
+      <mat-icon style="color:#2e7d32">person_add</mat-icon>
+      <span>New Contact</span>
+    </div>
+    <button mat-icon-button (click)="cancel()"><mat-icon>close</mat-icon></button>
+  </div>
+
+  <mat-stepper [selectedIndex]="stepIndex" (selectionChange)="stepIndex=$event.selectedIndex"
+    linear="false" class="dialog-stepper">
+
+    <!-- Step 1: Basic Info -->
+    <mat-step label="Basic Info">
+      <div class="step-content">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full Name *</mat-label>
+          <input matInput [(ngModel)]="contactName" placeholder="e.g. John Smith" />
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+
+        <div class="checkbox-row">
+          <mat-checkbox [(ngModel)]="isPersonal">Personal contact</mat-checkbox>
+          <mat-checkbox [(ngModel)]="isEmergency">Emergency contact</mat-checkbox>
+        </div>
+      </div>
+      <div class="step-actions">
+        <button mat-stroked-button (click)="cancel()">Cancel</button>
+        <button mat-flat-button color="primary" [disabled]="!step1Complete" matStepperNext>
+          Next <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </mat-step>
+
+    <!-- Step 2: Phone & Email -->
+    <mat-step label="Phone & Email">
+      <div class="step-content">
+        <p class="step-hint">These are optional — you can add them now or later.</p>
+
+        <div class="section-label"><mat-icon>phone</mat-icon> Phone Number</div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone number</mat-label>
+          <input matInput [(ngModel)]="phone" placeholder="+91 …" />
+          <mat-icon matPrefix>phone</mat-icon>
+        </mat-form-field>
+        <mat-checkbox [(ngModel)]="phoneIsWork" style="margin-bottom:8px">Work phone</mat-checkbox>
+
+        <div class="section-label" style="margin-top:8px"><mat-icon>email</mat-icon> Email</div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email address</mat-label>
+          <input matInput [(ngModel)]="email" placeholder="name@example.com" type="email" />
+          <mat-icon matPrefix>email</mat-icon>
+        </mat-form-field>
+        <mat-checkbox [(ngModel)]="emailIsWork">Work email</mat-checkbox>
+      </div>
+      <div class="step-actions">
+        <button mat-stroked-button matStepperPrevious><mat-icon>arrow_back</mat-icon> Back</button>
+        <button mat-flat-button color="primary"
+          [disabled]="!step1Complete || saving"
+          (click)="save()">
+          <mat-spinner *ngIf="saving" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+          <mat-icon *ngIf="!saving">save</mat-icon>
+          {{ saving ? 'Saving…' : 'Save Contact' }}
+        </button>
+      </div>
+    </mat-step>
+
+  </mat-stepper>
+</div>

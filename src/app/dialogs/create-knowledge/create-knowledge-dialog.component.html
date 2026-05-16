@@ -1,0 +1,30 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <div class="dialog-title"><mat-icon style="color:#4527a0">psychology</mat-icon><span>New Knowledge</span></div>
+    <button mat-icon-button (click)="cancel()"><mat-icon>close</mat-icon></button>
+  </div>
+  <div class="dialog-body">
+    <div class="variant-row">
+      <button *ngFor="let v of variants" class="var-chip" [class.active]="selected.id===v.id"
+        [style.--vc]="v.color" (click)="selected=v">
+        <mat-icon>{{ v.icon }}</mat-icon> {{ v.name }}
+      </button>
+    </div>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Title</mat-label>
+      <input matInput [(ngModel)]="title" placeholder="Short title…" />
+      <mat-icon matPrefix>title</mat-icon>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Content *</mat-label>
+      <textarea matInput [(ngModel)]="content" rows="6" [placeholder]="selected.placeholder"></textarea>
+    </mat-form-field>
+  </div>
+  <div class="dialog-actions">
+    <button mat-stroked-button (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="!canSave||saving" (click)="save()">
+      <mat-spinner *ngIf="saving" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+      <mat-icon *ngIf="!saving">save</mat-icon> {{ saving ? 'Saving…' : 'Save' }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <div class="dialog-title"><mat-icon style="color:#00838f">task_alt</mat-icon><span>New Task</span></div>
+    <button mat-icon-button (click)="cancel()"><mat-icon>close</mat-icon></button>
+  </div>
+  <div class="dialog-body">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Task Name *</mat-label>
+      <input matInput [(ngModel)]="taskName" placeholder="What needs to be done?" />
+      <mat-icon matPrefix>task_alt</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Details / Notes</mat-label>
+      <textarea matInput [(ngModel)]="details" rows="3" placeholder="Additional details…"></textarea>
+    </mat-form-field>
+
+    <div class="row-2">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Due Date</mat-label>
+        <input matInput [(ngModel)]="dueDate" type="date" />
+        <mat-icon matPrefix>event</mat-icon>
+      </mat-form-field>
+      <div class="priority-group">
+        <div class="section-label">Priority</div>
+        <div class="priority-chips">
+          <button *ngFor="let p of priorities" class="p-chip" [class.active]="priority===p"
+            [attr.data-p]="p" (click)="priority=p">{{ p }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dialog-actions">
+    <button mat-stroked-button (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="!canSave||saving" (click)="save()">
+      <mat-spinner *ngIf="saving" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+      <mat-icon *ngIf="!saving">save</mat-icon> {{ saving ? 'Saving…' : 'Save Task' }}
+    </button>
+  </div>
+</div>

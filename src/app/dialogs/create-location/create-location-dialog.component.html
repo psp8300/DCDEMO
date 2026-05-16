@@ -1,0 +1,101 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <div class="dialog-title"><mat-icon style="color:#558b2f">place</mat-icon><span>New Location</span></div>
+    <button mat-icon-button (click)="cancel()"><mat-icon>close</mat-icon></button>
+  </div>
+
+  <div class="dialog-body">
+    <!-- Type toggle -->
+    <div class="variant-row">
+      <button class="var-chip" [class.active]="variantId===30" [style.--vc]="'#558b2f'" (click)="variantId=30">
+        <mat-icon>map</mat-icon> Location / Place
+      </button>
+      <button class="var-chip" [class.active]="variantId===35" [style.--vc]="'#558b2f'" (click)="variantId=35">
+        <mat-icon>home</mat-icon> Address
+      </button>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Name *</mat-label>
+      <input matInput [(ngModel)]="name" placeholder="e.g. Home, Office, Favourite Cafe…" />
+      <mat-icon matPrefix>label</mat-icon>
+    </mat-form-field>
+
+    <!-- Location fields -->
+    <ng-container *ngIf="variantId === 30">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Google Maps Link</mat-label>
+        <input matInput [(ngModel)]="mapsLink" placeholder="https://maps.google.com/…" />
+        <mat-icon matPrefix>map</mat-icon>
+      </mat-form-field>
+      <div class="row-2">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Latitude</mat-label>
+          <input matInput [(ngModel)]="latitude" placeholder="17.4065" type="number" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Longitude</mat-label>
+          <input matInput [(ngModel)]="longitude" placeholder="78.4772" type="number" />
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Directions</mat-label>
+        <textarea matInput [(ngModel)]="directions" rows="2" placeholder="How to reach…"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Keywords</mat-label>
+        <input matInput [(ngModel)]="keywords" placeholder="cafe, wifi, quiet…" />
+      </mat-form-field>
+    </ng-container>
+
+    <!-- Address fields -->
+    <ng-container *ngIf="variantId === 35">
+      <div class="row-2">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>House / Flat No.</mat-label>
+          <input matInput [(ngModel)]="houseFlat" placeholder="12A" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Building Name</mat-label>
+          <input matInput [(ngModel)]="building" placeholder="Sunrise Apartments" />
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Area / Locality</mat-label>
+        <input matInput [(ngModel)]="area" placeholder="Kondapur" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Street</mat-label>
+        <input matInput [(ngModel)]="street" placeholder="Main Road" />
+      </mat-form-field>
+      <div class="row-2">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>City</mat-label>
+          <input matInput [(ngModel)]="city" placeholder="Hyderabad" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>State</mat-label>
+          <input matInput [(ngModel)]="state" placeholder="Telangana" />
+        </mat-form-field>
+      </div>
+      <div class="row-2">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Postal Code</mat-label>
+          <input matInput [(ngModel)]="postalCode" placeholder="500081" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Country</mat-label>
+          <input matInput [(ngModel)]="country" />
+        </mat-form-field>
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-stroked-button (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="!canSave||saving" (click)="save()">
+      <mat-spinner *ngIf="saving" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+      <mat-icon *ngIf="!saving">save</mat-icon> {{ saving ? 'Saving…' : 'Save' }}
+    </button>
+  </div>
+</div>

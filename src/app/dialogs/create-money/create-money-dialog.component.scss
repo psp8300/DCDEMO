@@ -1,0 +1,7 @@
+.dialog-wrapper { display: flex; flex-direction: column; width: 460px; max-width: 100%; }
+.dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px;
+  .dialog-title { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; color: #1a237e; } }
+.dialog-body { padding: 0 24px 8px; display: flex; flex-direction: column; gap: 12px; }
+.full-width { width: 100%; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px; border-top: 1px solid #f0f0f0; }

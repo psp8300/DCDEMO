@@ -1,0 +1,80 @@
+.dialog-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 540px;
+  max-width: 100%;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+
+  .dialog-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a237e;
+    mat-icon { color: #3949ab; }
+  }
+}
+
+.dialog-hint {
+  margin: 12px 24px 4px;
+  color: #666;
+  font-size: 14px;
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 12px 24px;
+}
+
+.type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  .type-icon {
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
+    color: var(--card-color);
+  }
+
+  .type-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  &:hover {
+    border-color: var(--card-color);
+    background: color-mix(in srgb, var(--card-color) 8%, white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+    .type-name { color: var(--card-color); }
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 24px 20px;
+  border-top: 1px solid #f0f0f0;
+}

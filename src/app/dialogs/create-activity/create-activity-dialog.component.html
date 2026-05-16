@@ -1,0 +1,235 @@
+<div class="dialog-wrapper">
+
+  <!-- Header -->
+  <div class="dialog-header">
+    <div class="dialog-title">
+      <mat-icon>bolt</mat-icon>
+      <span>New Activity</span>
+    </div>
+    <button mat-icon-button (click)="cancel()"><mat-icon>close</mat-icon></button>
+  </div>
+
+  <mat-stepper [selectedIndex]="stepIndex" (selectionChange)="stepIndex=$event.selectedIndex" linear="false" class="dialog-stepper">
+
+    <!-- ═══ STEP 1: Select Variant ═══ -->
+    <mat-step label="Select Type">
+      <div class="step-content">
+        <p class="step-hint">What type of activity are you logging?</p>
+        <div class="variant-grid">
+          <button *ngFor="let v of variants"
+            class="variant-card"
+            [class.selected]="selectedVariant?.id === v.id"
+            [style.--card-color]="v.color"
+            (click)="selectVariant(v)">
+            <mat-icon class="variant-icon">{{ v.icon }}</mat-icon>
+            <span class="variant-name">{{ v.name }}</span>
+          </button>
+        </div>
+      </div>
+      <div class="step-actions">
+        <button mat-stroked-button (click)="cancel()">Cancel</button>
+        <button mat-flat-button color="primary" [disabled]="!selectedVariant" matStepperNext>
+          Next <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </mat-step>
+
+    <!-- ═══ STEP 2: Details ═══ -->
+    <mat-step label="Details">
+      <div class="step-content" *ngIf="selectedVariant">
+
+        <!-- Variant badge -->
+        <div class="selected-badge" [style.background]="selectedVariant.color+'15'" [style.border-color]="selectedVariant.color+'55'">
+          <mat-icon [style.color]="selectedVariant.color">{{ selectedVariant.icon }}</mat-icon>
+          <span [style.color]="selectedVariant.color" style="font-weight:600">{{ selectedVariant.name }}</span>
+          <button mat-icon-button (click)="stepIndex=0" matTooltip="Change type" style="margin-left:auto">
+            <mat-icon style="font-size:16px;color:#999">edit</mat-icon>
+          </button>
+        </div>
+
+        <!-- Description -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description *</mat-label>
+          <textarea matInput [(ngModel)]="description" rows="2"
+            placeholder="e.g. Called Arjun about project update"></textarea>
+        </mat-form-field>
+
+        <!-- ── CONTACT FLOW ── -->
+        <div class="contact-section" *ngIf="selectedVariant.needsContact">
+          <div class="section-label">
+            <mat-icon>person</mat-icon> Contact
+          </div>
+
+          <!-- STATE: search -->
+          <ng-container *ngIf="contactState === 'search'">
+            <mat-form-field appearance="outline" class="full-width search-field">
+              <mat-label>Search contact...</mat-label>
+              <input matInput [(ngModel)]="contactSearch" (ngModelChange)="onContactSearch($event)" />
+              <mat-icon matPrefix>search</mat-icon>
+              <mat-progress-spinner *ngIf="contactsLoading" matSuffix diameter="16" mode="indeterminate"></mat-progress-spinner>
+            </mat-form-field>
+            <div class="contact-list">
+              <button class="contact-row skip-row" (click)="skipContact()">
+                <mat-icon>skip_next</mat-icon>
+                <div class="contact-info"><span>Skip for now</span><small>Will select later</small></div>
+              </button>
+              <button class="contact-row" *ngFor="let c of contacts" (click)="pickContact(c)">
+                <mat-icon>person</mat-icon>
+                <div class="contact-info">
+                  <span>{{ c.name }}</span>
+                  <small *ngIf="c.phoneNumber">{{ c.phoneNumber }}</small>
+                </div>
+                <mat-icon class="row-arrow">chevron_right</mat-icon>
+              </button>
+              <div class="no-contacts" *ngIf="!contactsLoading && contacts.length===0 && contactSearch">No contacts found</div>
+            </div>
+          </ng-container>
+
+          <!-- STATE: phone selection -->
+          <ng-container *ngIf="contactState === 'phones'">
+            <div class="state-header">
+              <button mat-icon-button (click)="backToContacts()" matTooltip="Back to contacts">
+                <mat-icon>arrow_back</mat-icon>
+              </button>
+              <div class="state-contact-name">
+                <mat-icon>person</mat-icon>{{ selectedContact?.name }}
+              </div>
+            </div>
+            <div class="section-sublabel">Select phone number</div>
+            <div class="contact-list" *ngIf="!phonesLoading">
+              <button class="contact-row skip-row" (click)="skipPhone()">
+                <mat-icon>skip_next</mat-icon>
+                <div class="contact-info"><span>Skip</span><small>No number selected</small></div>
+              </button>
+              <button class="contact-row" *ngFor="let p of phones" (click)="pickPhone(p)">
+                <mat-icon>{{ p.isWork ? 'work' : 'phone' }}</mat-icon>
+                <div class="contact-info">
+                  <span>{{ p.phoneNumber }}</span>
+                  <small>{{ p.isPrimary ? 'Primary' : '' }} {{ p.isWork ? '· Work' : '· Personal' }}</small>
+                </div>
+                <mat-icon class="row-arrow">chevron_right</mat-icon>
+              </button>
+              <div class="no-contacts" *ngIf="phones.length===0">No phone numbers found</div>
+            </div>
+            <div class="centered-spinner" *ngIf="phonesLoading">
+              <mat-spinner diameter="28"></mat-spinner>
+            </div>
+          </ng-container>
+
+          <!-- STATE: selected -->
+          <ng-container *ngIf="contactState === 'selected'">
+            <div class="selected-contact-chip" *ngIf="selectedContact; else noContactChip">
+              <mat-icon>person</mat-icon>
+              <div class="chip-info">
+                <span class="chip-name">{{ selectedContact.name }}</span>
+                <small *ngIf="selectedPhone">{{ selectedPhone.phoneNumber }}</small>
+                <small *ngIf="!selectedPhone" class="muted">No number selected</small>
+              </div>
+              <button mat-icon-button (click)="clearContact()" matTooltip="Change contact">
+                <mat-icon style="font-size:16px">edit</mat-icon>
+              </button>
+            </div>
+            <ng-template #noContactChip>
+              <div class="selected-contact-chip skip-chip">
+                <mat-icon>skip_next</mat-icon>
+                <span style="flex:1;color:#888">No contact selected</span>
+                <button mat-icon-button (click)="clearContact()">
+                  <mat-icon style="font-size:16px">edit</mat-icon>
+                </button>
+              </div>
+            </ng-template>
+          </ng-container>
+        </div>
+
+        <!-- ── ONLINE MEETING ── -->
+        <div class="meeting-section" *ngIf="selectedVariant.needsMeeting">
+          <div class="section-label"><mat-icon>video_call</mat-icon> Meeting Details <span class="optional">(optional)</span></div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Platform</mat-label>
+            <input matInput [(ngModel)]="meetingPlatform" placeholder="Zoom, Teams, Google Meet…" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Meeting Link</mat-label>
+            <input matInput [(ngModel)]="meetingLink" placeholder="https://…" />
+          </mat-form-field>
+          <div class="row-2">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Meeting ID</mat-label>
+              <input matInput [(ngModel)]="meetingIdNumber" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Password</mat-label>
+              <input matInput [(ngModel)]="meetingPassword" />
+            </mat-form-field>
+          </div>
+        </div>
+
+      </div>
+      <div class="step-actions">
+        <button mat-stroked-button matStepperPrevious><mat-icon>arrow_back</mat-icon> Back</button>
+        <button mat-flat-button color="primary" [disabled]="!detailsComplete" matStepperNext>
+          Next <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+    </mat-step>
+
+    <!-- ═══ STEP 3: Schedule ═══ -->
+    <mat-step label="Schedule">
+      <div class="step-content">
+
+        <div class="schedule-toggle">
+          <mat-checkbox [(ngModel)]="hasSchedule">Add a schedule / date</mat-checkbox>
+        </div>
+
+        <ng-container *ngIf="hasSchedule">
+          <div class="full-day-row">
+            <mat-checkbox [(ngModel)]="isFullDay">Full day event</mat-checkbox>
+          </div>
+
+          <!-- From -->
+          <div class="section-label" style="margin-top:12px"><mat-icon>play_arrow</mat-icon> From</div>
+          <div class="date-time-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Date</mat-label>
+              <input matInput type="date" [(ngModel)]="scheduleFromDate" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" *ngIf="!isFullDay">
+              <mat-label>Time</mat-label>
+              <input matInput type="time" [(ngModel)]="scheduleFromTime" />
+            </mat-form-field>
+          </div>
+
+          <!-- To -->
+          <div class="section-label"><mat-icon>stop</mat-icon> To <span class="optional">(optional)</span></div>
+          <div class="date-time-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Date</mat-label>
+              <input matInput type="date" [(ngModel)]="scheduleToDate" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width" *ngIf="!isFullDay">
+              <mat-label>Time</mat-label>
+              <input matInput type="time" [(ngModel)]="scheduleToTime" />
+            </mat-form-field>
+          </div>
+        </ng-container>
+
+        <div class="no-schedule-hint" *ngIf="!hasSchedule">
+          <mat-icon>event_available</mat-icon>
+          <span>You can add a date and time, or skip and save without one.</span>
+        </div>
+
+      </div>
+      <div class="step-actions">
+        <button mat-stroked-button matStepperPrevious><mat-icon>arrow_back</mat-icon> Back</button>
+        <button mat-flat-button color="primary"
+          [disabled]="!detailsComplete || saving"
+          (click)="save()">
+          <mat-spinner *ngIf="saving" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+          <mat-icon *ngIf="!saving">save</mat-icon>
+          {{ saving ? 'Saving…' : 'Save Activity' }}
+        </button>
+      </div>
+    </mat-step>
+
+  </mat-stepper>
+</div>

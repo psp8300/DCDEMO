@@ -1,0 +1,40 @@
+<div class="dialog-wrapper">
+  <div class="dialog-header">
+    <div class="dialog-title">
+      <mat-icon style="color:#1565c0">link</mat-icon>
+      <span>New HyperLink</span>
+    </div>
+    <button mat-icon-button (click)="cancel()"><mat-icon>close</mat-icon></button>
+  </div>
+
+  <div class="dialog-body">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Link Name *</mat-label>
+      <input matInput [(ngModel)]="linkName" placeholder="e.g. Project Dashboard, YouTube Tutorial…" />
+      <mat-icon matPrefix>label</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>URL *</mat-label>
+      <input matInput [(ngModel)]="url" placeholder="https://…" type="url" />
+      <mat-icon matPrefix>public</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description / Type <span class="optional">(optional)</span></mat-label>
+      <input matInput [(ngModel)]="description" placeholder="e.g. Reference, Tutorial, Login page…" />
+      <mat-icon matPrefix>description</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-stroked-button (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary"
+      [disabled]="!canSave || saving"
+      (click)="save()">
+      <mat-spinner *ngIf="saving" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+      <mat-icon *ngIf="!saving">save</mat-icon>
+      {{ saving ? 'Saving…' : 'Save Link' }}
+    </button>
+  </div>
+</div>
