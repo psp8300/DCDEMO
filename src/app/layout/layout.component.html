@@ -1,0 +1,86 @@
+<div class="layout-wrapper" [class.sidebar-collapsed]="!sidebarOpen">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="logo-icon">DC</div>
+      <span class="logo-text">DClutter</span>
+    </div>
+
+    <!-- Divider -->
+    <div class="sidebar-divider"></div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of navItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="nav-item">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <!-- Spacer -->
+    <div class="sidebar-spacer"></div>
+
+    <!-- Divider -->
+    <div class="sidebar-divider"></div>
+
+    <!-- User footer -->
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ initials }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ user?.displayName }}</div>
+        <div class="user-email">{{ user?.email }}</div>
+      </div>
+      <button
+        mat-icon-button
+        class="logout-btn"
+        matTooltip="Sign out"
+        (click)="logout()">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="main">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <button mat-icon-button class="menu-btn" (click)="toggleSidebar()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="page-title">{{ pageTitle }}</span>
+      <div class="topbar-spacer"></div>
+      <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-btn">
+        <div class="topbar-avatar">{{ initials }}</div>
+      </button>
+      <mat-menu #userMenu="matMenu" xPosition="before">
+        <div class="user-menu-header">
+          <strong>{{ user?.displayName }}</strong>
+          <small>{{ user?.email }}</small>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Sign Out</span>
+        </button>
+      </mat-menu>
+    </header>
+
+    <!-- Page content -->
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+
+    <!-- Footer -->
+    <footer class="layout-footer">
+      <span>DClutter &copy; {{ currentYear }}</span>
+    </footer>
+
+  </div>
+</div>

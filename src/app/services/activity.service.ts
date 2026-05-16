@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 export interface ActivityItem {
   logId: number;
   activityId: number;
+  activityName?: string;
   date?: string;
   durationMinutes?: number;
   notes?: string;

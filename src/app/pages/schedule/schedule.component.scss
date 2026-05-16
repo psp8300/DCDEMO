@@ -1,0 +1,259 @@
+:host {
+  display: block;
+}
+
+.schedule-page {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  gap: 16px;
+}
+
+// ─── Toolbar ─────────────────────────────────────────────────────────────────
+
+.cal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 12px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  flex-shrink: 0;
+}
+
+.cal-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .cal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    min-width: 180px;
+    margin-right: 8px;
+  }
+
+  .today-btn {
+    margin-left: 4px;
+    font-size: 13px;
+    border-color: #d1d5db !important;
+    color: #374151;
+    border-radius: 8px !important;
+    height: 34px;
+    line-height: 34px;
+    padding: 0 14px;
+
+    &:hover { border-color: #6366f1 !important; color: #6366f1; }
+  }
+}
+
+.cal-right {
+  display: flex;
+  align-items: center;
+}
+
+.view-tabs {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+
+  button {
+    border: none;
+    background: transparent;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 180ms ease;
+
+    &:hover { color: #111827; background: rgba(0,0,0,0.04); }
+
+    &.active {
+      background: #ffffff;
+      color: #6366f1;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  }
+}
+
+// ─── Activity filters ────────────────────────────────────────────────────────
+
+.activity-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px 6px 10px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 20px;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 180ms ease;
+
+  &:hover { border-color: var(--chip-color, #6366f1); color: var(--chip-color, #6366f1); }
+
+  &.active {
+    background: var(--chip-color, #6366f1);
+    border-color: var(--chip-color, #6366f1);
+    color: #ffffff;
+
+    .chip-count { background: rgba(255,255,255,0.25); color: #fff; }
+    .chip-dot   { background: rgba(255,255,255,0.6) !important; }
+  }
+}
+
+.chip-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 180ms ease;
+}
+
+.all-dot {
+  background: linear-gradient(135deg, #6366f1 0%, #10b981 50%, #f59e0b 100%);
+}
+
+.chip-count {
+  background: #f3f4f6;
+  color: #6b7280;
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: all 180ms ease;
+}
+
+// ─── Loading ─────────────────────────────────────────────────────────────────
+
+.cal-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px;
+  color: #6b7280;
+  font-size: 14px;
+
+  .spin {
+    animation: spin 1s linear infinite;
+    color: #6366f1;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+// ─── Calendar wrapper ─────────────────────────────────────────────────────────
+
+.cal-wrapper {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  overflow: hidden;
+
+  &.hidden { display: none; }
+}
+
+// ─── FullCalendar overrides ───────────────────────────────────────────────────
+
+:host ::ng-deep {
+
+  .fc {
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .fc-theme-standard td,
+  .fc-theme-standard th,
+  .fc-theme-standard .fc-scrollgrid {
+    border-color: #f3f4f6;
+  }
+
+  // Day header
+  .fc-col-header-cell {
+    padding: 10px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #fafafa;
+  }
+
+  // Day number
+  .fc-daygrid-day-number {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    padding: 6px 8px;
+  }
+
+  // Today highlight
+  .fc-day-today {
+    background: #eef2ff !important;
+
+    .fc-daygrid-day-number {
+      background: #6366f1;
+      color: #fff;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 4px;
+      padding: 0;
+      font-size: 12px;
+    }
+  }
+
+  // Events
+  .fc-event {
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border: none !important;
+    padding: 2px 6px;
+    cursor: pointer;
+
+    &:hover { filter: brightness(0.9); }
+  }
+
+  .fc-daygrid-event-dot { display: none; }
+
+  // List view
+  .fc-list-event:hover td { background: #f5f3ff; }
+  .fc-list-event-title { font-weight: 500; }
+  .fc-list-day-cushion { background: #f9fafb !important; }
+  .fc-list-day-text,
+  .fc-list-day-side-text { color: #374151; font-weight: 600; }
+
+  // More link
+  .fc-daygrid-more-link {
+    font-size: 11px;
+    color: #6366f1;
+    font-weight: 600;
+  }
+
+  // Scrollgrid
+  .fc-scrollgrid { border-radius: 12px; overflow: hidden; }
+}

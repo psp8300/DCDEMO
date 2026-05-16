@@ -1,8 +1,19 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; background: #f4f6fb; }
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  background: #f1f5f9;
+  -webkit-font-smoothing: antialiased;
+}
 
 * { box-sizing: border-box; }
 
 mat-divider { margin: 4px 0 !important; }
+
+.mat-mdc-card { border-radius: 12px !important; }

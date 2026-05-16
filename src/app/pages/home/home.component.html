@@ -1,97 +1,140 @@
-<mat-sidenav-container class="app-container">
+<div class="dashboard">
 
-  <!-- Sidebar -->
-  <mat-sidenav mode="side" opened class="sidenav">
-    <div class="sidenav-header">
-      <div class="logo">DC</div>
-      <span class="app-name">DClutter</span>
+  <h2 class="welcome">Welcome back, {{ user?.displayName }}!</h2>
+
+  <!-- ── Stat Cards ─────────────────────────────────────────────────────── -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#6366f1"><mat-icon>inventory_2</mat-icon></div>
+      <div class="stat-info">
+        <div class="stat-value">{{ totalItems || '—' }}</div>
+        <div class="stat-label">Total Items</div>
+      </div>
     </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#10b981"><mat-icon>bolt</mat-icon></div>
+      <div class="stat-info">
+        <div class="stat-value">{{ totalActivities || '—' }}</div>
+        <div class="stat-label">Total Activities</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#f59e0b"><mat-icon>today</mat-icon></div>
+      <div class="stat-info">
+        <div class="stat-value">{{ activitiesToday }}</div>
+        <div class="stat-label">Activities Today</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#8b5cf6"><mat-icon>event</mat-icon></div>
+      <div class="stat-info">
+        <div class="stat-value">{{ upcomingCount }}</div>
+        <div class="stat-label">Upcoming</div>
+      </div>
+    </div>
+  </div>
 
-    <mat-nav-list>
-      <mat-list-item
-        *ngFor="let item of menuItems"
-        [class.active]="activeMenu === item.id"
-        (click)="navigate(item)">
-        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-        <span matListItemTitle>{{ item.label }}</span>
-      </mat-list-item>
-    </mat-nav-list>
-  </mat-sidenav>
+  <!-- ── Bottom row ─────────────────────────────────────────────────────── -->
+  <div class="bottom-row">
 
-  <!-- Main Content -->
-  <mat-sidenav-content class="main-content">
-
-    <!-- Top Toolbar -->
-    <mat-toolbar class="toolbar">
-      <span class="page-title">{{ activeMenu | titlecase }}</span>
-      <span class="spacer"></span>
-      <button mat-icon-button [matMenuTriggerFor]="userMenu">
-        <div class="avatar">{{ getInitials() }}</div>
-      </button>
-      <mat-menu #userMenu="matMenu">
-        <div class="user-menu-header">
-          <strong>{{ user?.displayName }}</strong>
-          <small>{{ user?.email }}</small>
-        </div>
-        <mat-divider></mat-divider>
-        <button mat-menu-item (click)="logout()">
-          <mat-icon>logout</mat-icon> Sign Out
-        </button>
-      </mat-menu>
-    </mat-toolbar>
-
-    <!-- Dashboard Content -->
-    <div class="content-area" *ngIf="activeMenu === 'dashboard'">
-      <h2 class="welcome">Welcome back, {{ user?.displayName }}!</h2>
-
-      <!-- Stat Cards -->
-      <div class="stats-grid">
-        <mat-card class="stat-card" *ngFor="let stat of stats">
-          <mat-card-content>
-            <div class="stat-icon" [style.background]="stat.color">
-              <mat-icon>{{ stat.icon }}</mat-icon>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ stat.value }}</div>
-              <div class="stat-label">{{ stat.label }}</div>
-            </div>
-          </mat-card-content>
-        </mat-card>
+    <!-- Task Distribution -->
+    <div class="panel chart-panel">
+      <div class="panel-header">
+        <span class="panel-title">Task Distribution</span>
       </div>
 
-      <!-- Quick Actions -->
-      <mat-card class="quick-actions-card">
-        <mat-card-header>
-          <mat-card-title>Quick Actions</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="actions-grid">
-            <button mat-stroked-button (click)="navigate({id:'lists', route:'/lists'})">
-              <mat-icon>list_alt</mat-icon> My Lists
-            </button>
-            <button mat-stroked-button (click)="navigate({id:'items', route:'/items'})">
-              <mat-icon>inventory_2</mat-icon> Browse Items
-            </button>
-            <button mat-stroked-button (click)="navigate({id:'activity', route:'/activity'})">
-              <mat-icon>history</mat-icon> View Activity
-            </button>
-            <button mat-stroked-button (click)="navigate({id:'schedule', route:null})">
-              <mat-icon>event</mat-icon> Schedule
-            </button>
-            <button mat-stroked-button (click)="navigate({id:'settings', route:null})">
-              <mat-icon>settings</mat-icon> Settings
-            </button>
+      <div class="chart-loading" *ngIf="donutLoading">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+
+      <div class="chart-body" *ngIf="!donutLoading">
+        <!-- SVG Donut -->
+        <div class="donut-wrap">
+          <svg viewBox="0 0 200 200" class="donut-svg">
+            <circle cx="100" cy="100" [attr.r]="RADIUS" fill="none" stroke="#f3f4f6" stroke-width="28"/>
+            <circle
+              *ngFor="let s of donutSlices"
+              cx="100" cy="100"
+              [attr.r]="RADIUS"
+              fill="none"
+              [attr.stroke]="s.color"
+              stroke-width="28"
+              [attr.stroke-dasharray]="sliceDash(s)"
+              [attr.stroke-dashoffset]="sliceOffset(s)"
+              stroke-linecap="butt"
+              class="donut-slice"
+              [class.hovered]="hoveredSlice === s"
+              (mouseenter)="hoveredSlice = s"
+              (mouseleave)="hoveredSlice = null">
+            </circle>
+            <!-- Centre label -->
+            <text x="100" y="95"  text-anchor="middle" class="donut-center-val">{{ hoveredSlice ? hoveredSlice.value : totalItems }}</text>
+            <text x="100" y="115" text-anchor="middle" class="donut-center-lbl">{{ hoveredSlice ? hoveredSlice.label : 'items' }}</text>
+          </svg>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+          <div
+            *ngFor="let s of donutSlices"
+            class="legend-item"
+            [class.active]="hoveredSlice === s"
+            (mouseenter)="hoveredSlice = s"
+            (mouseleave)="hoveredSlice = null">
+            <span class="legend-dot" [style.background]="s.color"></span>
+            <span class="legend-label">{{ s.label }}</span>
+            <span class="legend-value">{{ s.value }}</span>
+            <span class="legend-pct">{{ s.percent }}%</span>
           </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </div>
     </div>
 
-    <!-- Placeholder for other sections -->
-    <div class="content-area coming-soon" *ngIf="activeMenu !== 'dashboard'">
-      <mat-icon class="big-icon">construction</mat-icon>
-      <h2>{{ activeMenu | titlecase }}</h2>
-      <p>This section is coming soon.</p>
+    <!-- Schedule -->
+    <div class="panel schedule-panel">
+      <div class="panel-header">
+        <span class="panel-title">Schedule</span>
+        <div class="schedule-tabs">
+          <button [class.active]="scheduleView==='today'"    (click)="scheduleView='today'">Today</button>
+          <button [class.active]="scheduleView==='tomorrow'" (click)="scheduleView='tomorrow'">Tomorrow</button>
+        </div>
+      </div>
+
+      <div class="chart-loading" *ngIf="scheduleLoading">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+
+      <div class="schedule-list" *ngIf="!scheduleLoading">
+        <div class="schedule-empty" *ngIf="filteredSchedule.length === 0">
+          <mat-icon>event_available</mat-icon>
+          <p>No activities {{ scheduleView === 'today' ? 'today' : 'tomorrow' }}</p>
+        </div>
+        <div class="schedule-item" *ngFor="let item of filteredSchedule">
+          <div class="sched-accent" [style.background]="item.color"></div>
+          <div class="sched-body">
+            <div class="sched-title">{{ item.title }}</div>
+            <div class="sched-meta">
+              <span *ngIf="item.durationMinutes" class="sched-meta-item">
+                <mat-icon>timer</mat-icon> {{ formatDuration(item.durationMinutes) }}
+              </span>
+              <span *ngIf="item.notes" class="sched-meta-item sched-notes">
+                <mat-icon>notes</mat-icon> {{ item.notes }}
+              </span>
+            </div>
+          </div>
+          <mat-icon class="sched-arrow">chevron_right</mat-icon>
+        </div>
+      </div>
     </div>
 
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  </div>
+
+  <!-- ── Quick Actions ──────────────────────────────────────────────────── -->
+  <div class="quick-links">
+    <a *ngFor="let link of quickLinks" [routerLink]="link.route" class="quick-link">
+      <div class="quick-icon"><mat-icon>{{ link.icon }}</mat-icon></div>
+      <span>{{ link.label }}</span>
+    </a>
+  </div>
+
+</div>

@@ -14,6 +14,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatTableModule } from '@angular/material/table';
 import { ItemsService, ItemModel, ItemType } from '../../services/items.service';
 import { AuthService } from '../../services/auth.service';
 import { CreateItemDialogComponent } from '../../dialogs/create-item/create-item-dialog.component';
@@ -26,7 +27,8 @@ import { CreateItemDialogComponent } from '../../dialogs/create-item/create-item
     MatCardModule, MatIconModule, MatButtonModule,
     MatFormFieldModule, MatInputModule,
     MatProgressSpinnerModule, MatChipsModule,
-    MatPaginatorModule, MatTooltipModule, MatDialogModule
+    MatPaginatorModule, MatTooltipModule, MatDialogModule,
+    MatTableModule,
   ],
   templateUrl: './items.component.html',
   styleUrl: './items.component.scss'
@@ -40,6 +42,8 @@ export class ItemsComponent implements OnInit, OnDestroy {
 
   searchTerm = '';
   selectedTypeId: number | null = null;
+  viewMode: 'grid' | 'card' = 'grid';
+  displayedColumns = ['type', 'id', 'name', 'active', 'date'];
   currentPage = 0;
   pageSize = 50;
   totalCount = 0;
@@ -98,7 +102,11 @@ export class ItemsComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: res => {
         if (res.success) {
-          this.items = res.items;
+          this.items = res.items.slice().sort((a, b) => {
+            const da = new Date(a.lastUpdatedDate || a.createdDate || 0).getTime();
+            const db = new Date(b.lastUpdatedDate || b.createdDate || 0).getTime();
+            return db - da;
+          });
           this.totalCount = res.totalCount;
         } else {
           this.error = res.message || 'Failed to load items.';

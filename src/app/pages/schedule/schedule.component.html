@@ -1,0 +1,54 @@
+<div class="schedule-page">
+
+  <!-- Toolbar -->
+  <div class="cal-toolbar">
+    <div class="cal-left">
+      <span class="cal-title">{{ viewTitle }}</span>
+      <button mat-icon-button (click)="previous()" matTooltip="Previous"><mat-icon>chevron_left</mat-icon></button>
+      <button mat-icon-button (click)="next()"     matTooltip="Next">    <mat-icon>chevron_right</mat-icon></button>
+      <button mat-stroked-button (click)="today()" class="today-btn">Today</button>
+    </div>
+    <div class="cal-right">
+      <div class="view-tabs">
+        <button [class.active]="currentView==='dayGridMonth'" (click)="changeView('dayGridMonth')">Month</button>
+        <button [class.active]="currentView==='timeGridWeek'" (click)="changeView('timeGridWeek')">Week</button>
+        <button [class.active]="currentView==='timeGridDay'"  (click)="changeView('timeGridDay')">Day</button>
+        <button [class.active]="currentView==='listYear'"     (click)="changeView('listYear')">List</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity filters -->
+  <div class="activity-filters" *ngIf="!loading && filters.length">
+    <button
+      class="filter-chip"
+      [class.active]="selectedActivityId === null"
+      (click)="selectFilter(null)">
+      <span class="chip-dot all-dot"></span>
+      All
+      <span class="chip-count">{{ allEvents.length }}</span>
+    </button>
+    <button
+      *ngFor="let f of filters"
+      class="filter-chip"
+      [class.active]="selectedActivityId === f.activityId"
+      [style.--chip-color]="f.color"
+      (click)="selectFilter(f.activityId)">
+      <span class="chip-dot" [style.background]="f.color"></span>
+      {{ f.name }}
+      <span class="chip-count">{{ f.count }}</span>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="cal-loading" *ngIf="loading">
+    <mat-icon class="spin">sync</mat-icon>
+    <span>Loading activities…</span>
+  </div>
+
+  <!-- Calendar -->
+  <div class="cal-wrapper" [class.hidden]="loading">
+    <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+  </div>
+
+</div>
