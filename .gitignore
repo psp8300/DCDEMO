@@ -40,3 +40,6 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Demo sync flag (internal use, not for git)
+.pending-service-sync.json
