@@ -1,0 +1,37 @@
+﻿{
+    "changedServices":  [
+                            {
+                                "newMethods":  [
+                                                   "getItems(userId: number, search?: string, itemTypeId?: number, page = 1, pageSize = 50): Observable",
+                                                   "getItemTypes(userId: number): Observable",
+                                                   "getVariants(userId: number): Observable",
+                                                   "getContactPhones(userId: number, contactItemId: number): Observable",
+                                                   "getContacts(userId: number, search?: string): Observable"
+                                               ],
+                                "file":  "items.service.ts",
+                                "newInterfaces":  [
+
+                                                  ]
+                            },
+                            {
+                                "newMethods":  [
+                                                   "getActivity(userId: number): Observable"
+                                               ],
+                                "file":  "activity.service.ts",
+                                "newInterfaces":  [
+
+                                                  ]
+                            },
+                            {
+                                "newMethods":  [
+                                                   "getLists(userId: number): Observable"
+                                               ],
+                                "file":  "lists.service.ts",
+                                "newInterfaces":  [
+
+                                                  ]
+                            }
+                        ],
+    "timestamp":  "2026-05-16 18:40:13",
+    "commit":  "test123abc"
+}
