@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { ItemModel } from './items.service';
 
 export interface ListItem {
   listId: number;
@@ -14,19 +15,29 @@ export interface ListsResponse {
   message: string;
 }
 
-const MOCK_LISTS: ListItem[] = [
-  { listId: 1, listName: 'Shopping List',        createdDate: '2026-04-01', lastUsedDate: '2026-05-15' },
-  { listId: 2, listName: 'Work Tasks',            createdDate: '2026-03-15', lastUsedDate: '2026-05-14' },
-  { listId: 3, listName: 'Home Maintenance',      createdDate: '2026-02-10', lastUsedDate: '2026-04-30' },
-  { listId: 4, listName: 'Books to Read',         createdDate: '2026-01-05', lastUsedDate: '2026-05-10' },
-  { listId: 5, listName: 'Project Alpha Backlog', createdDate: '2026-03-20', lastUsedDate: '2026-05-13' },
-  { listId: 6, listName: 'Weekend Plans',         createdDate: '2026-05-01', lastUsedDate: '2026-05-12' },
-];
+export interface ListItemsResponse {
+  success: boolean;
+  items: ItemModel[];
+  totalCount: number;
+  message?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ListsService {
 
   getLists(_userId: number): Observable<ListsResponse> {
-    return of({ success: true, lists: MOCK_LISTS, message: 'OK' });
+    return of({ success: true, lists: [], message: 'OK' });
+  }
+
+  createList(_userId: number, _listName: string): Observable<{ success: boolean; listId?: number; message?: string }> {
+    return of({ success: true, listId: 0, message: 'List created' });
+  }
+
+  getListItems(_userId: number, _listId: number): Observable<ListItemsResponse> {
+    return of({ success: true, items: [], totalCount: 0 });
+  }
+
+  deleteList(_userId: number, _listId: number): Observable<{ success: boolean; message?: string }> {
+    return of({ success: true, message: 'List deleted' });
   }
 }
