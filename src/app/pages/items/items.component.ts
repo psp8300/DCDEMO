@@ -43,7 +43,7 @@ export class ItemsComponent implements OnInit, OnDestroy {
 
   searchTerm = '';
   selectedTypeId: number | null = null;
-  viewMode: 'grid' | 'card' = 'grid';
+  viewMode: 'grid' | 'card' = window.innerWidth <= 767 ? 'card' : 'grid';
   displayedColumns = ['type', 'id', 'name', 'active', 'date'];
   currentPage = 0;
   pageSize = 50;

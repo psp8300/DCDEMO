@@ -257,3 +257,24 @@
   // Scrollgrid
   .fc-scrollgrid { border-radius: 12px; overflow: hidden; }
 }
+
+// ─── Mobile ──────────────────────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  .cal-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .cal-left {
+    width: 100%;
+    justify-content: space-between;
+    .cal-title { min-width: unset; font-size: 15px; }
+  }
+
+  .cal-right { width: 100%; justify-content: center; }
+
+  .view-tabs button { padding: 5px 10px; font-size: 12px; }
+}

@@ -16,3 +16,5 @@
   &[data-p="Critical"].active { border-color: #880e4f; background: #fce4ec; color: #880e4f; }
 }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px; border-top: 1px solid #f0f0f0; }
+
+@media (max-width: 767px) { .row-2 { grid-template-columns: 1fr; } }

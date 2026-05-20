@@ -271,3 +271,9 @@
 }
 
 .full-width { width: 100%; }
+
+@media (max-width: 767px) {
+  .variant-grid   { grid-template-columns: repeat(3, 1fr); }
+  .row-2          { grid-template-columns: 1fr; }
+  .date-time-row  { grid-template-columns: 1fr; }
+}

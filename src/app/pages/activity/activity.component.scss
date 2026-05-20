@@ -140,3 +140,8 @@
   h3 { color: #666; margin: 12px 0 4px; }
   p { margin: 0; font-size: 14px; }
 }
+
+@media (max-width: 767px) {
+  .page-header { flex-wrap: wrap; h2 { font-size: 18px; } }
+  .timeline { padding-left: 18px; }
+}

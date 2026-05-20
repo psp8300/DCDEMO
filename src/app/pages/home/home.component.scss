@@ -23,6 +23,7 @@
   gap: 16px;
 
   @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px)  { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
 
 .stat-card {
@@ -57,6 +58,14 @@
     font-size: 13px;
     color: #6b7280;
     margin-top: 4px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 14px;
+    gap: 10px;
+    .stat-icon { width: 40px; height: 40px; mat-icon { font-size: 20px; width: 20px; height: 20px; } }
+    .stat-value { font-size: 22px; }
+    .stat-label { font-size: 11px; }
   }
 }
 

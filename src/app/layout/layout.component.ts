@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -34,6 +34,7 @@ interface NavItem {
 export class LayoutComponent implements OnInit, OnDestroy {
   user: UserInfo | null = null;
   sidebarOpen = true;
+  isMobile    = false;
   pageTitle = 'Dashboard';
 
   navItems: NavItem[] = [
@@ -55,12 +56,24 @@ export class LayoutComponent implements OnInit, OnDestroy {
     return this.user.displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   }
 
+  @HostListener('window:resize')
+  onResize(): void {
+    this.isMobile   = window.innerWidth <= 767;
+    this.sidebarOpen = !this.isMobile;
+  }
+
   ngOnInit(): void {
+    this.isMobile    = window.innerWidth <= 767;
+    this.sidebarOpen = !this.isMobile;
     this.user = this.auth.getUser();
     this.updateTitle(this.router.url);
     this.routerSub = this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
-      .subscribe((e: any) => this.updateTitle(e.urlAfterRedirects));
+      .subscribe((e: any) => {
+        this.updateTitle(e.urlAfterRedirects);
+        // Auto-close sidebar after navigation on mobile
+        if (this.isMobile) this.sidebarOpen = false;
+      });
   }
 
   ngOnDestroy(): void {

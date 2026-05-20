@@ -1,15 +1,21 @@
 <div class="lists-container">
 
   <div class="page-header">
-    <h2>My Lists</h2>
-    <span class="count-badge" *ngIf="!loading">{{ filteredLists.length }} lists</span>
+    <div class="header-left">
+      <h2>My Lists</h2>
+      <span class="count-badge" *ngIf="!loading">{{ filteredLists.length }}</span>
+    </div>
+    <button mat-flat-button color="primary" class="new-list-btn" (click)="openCreateList()">
+      <mat-icon>add</mat-icon>
+      <span class="btn-label">New List</span>
+    </button>
   </div>
 
   <!-- Search -->
   <mat-form-field appearance="outline" class="search-field">
     <mat-label>Search lists</mat-label>
     <mat-icon matPrefix>search</mat-icon>
-    <input matInput [(ngModel)]="searchTerm" placeholder="Type to filter..." />
+    <input matInput [(ngModel)]="searchTerm" placeholder="Type to filter…" />
     <button mat-icon-button matSuffix *ngIf="searchTerm" (click)="searchTerm=''">
       <mat-icon>close</mat-icon>
     </button>
@@ -18,18 +24,33 @@
   <!-- Loading -->
   <div class="centered" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
-    <p>Loading lists...</p>
+    <p>Loading lists…</p>
   </div>
 
   <!-- Error -->
-  <div class="error-box" *ngIf="error">
+  <div class="error-box" *ngIf="error && !loading">
     <mat-icon>error_outline</mat-icon>
     <span>{{ error }}</span>
   </div>
 
-  <!-- Lists Grid -->
+  <!-- Lists -->
   <div class="lists-grid" *ngIf="!loading && !error">
-    <mat-card class="list-card" *ngFor="let list of filteredLists">
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="filteredLists.length === 0">
+      <mat-icon>inbox</mat-icon>
+      <h3>No lists found</h3>
+      <p>{{ searchTerm ? 'Try a different search term' : 'Tap New List to create your first list' }}</p>
+      <button mat-flat-button color="primary" *ngIf="!searchTerm" (click)="openCreateList()">
+        <mat-icon>add</mat-icon> Create List
+      </button>
+    </div>
+
+    <!-- List cards -->
+    <mat-card class="list-card"
+              *ngFor="let list of filteredLists"
+              (click)="openListItems(list)"
+              [class.confirming-delete]="deletingId === list.listId">
       <mat-card-content>
         <div class="list-icon">
           <mat-icon>list_alt</mat-icon>
@@ -38,19 +59,23 @@
           <div class="list-name">{{ list.listName }}</div>
           <div class="list-meta">
             <span><mat-icon>calendar_today</mat-icon> {{ formatDate(list.createdDate) }}</span>
-            <span *ngIf="list.lastUsedDate"><mat-icon>access_time</mat-icon> Used {{ formatDate(list.lastUsedDate) }}</span>
+            <span *ngIf="list.lastUsedDate"><mat-icon>access_time</mat-icon> {{ formatDate(list.lastUsedDate) }}</span>
           </div>
         </div>
-        <mat-icon class="arrow-icon">chevron_right</mat-icon>
+
+        <div class="card-actions">
+          <!-- Delete button — tap once to arm (turns red), tap again to confirm -->
+          <button mat-icon-button
+                  class="delete-btn"
+                  [class.armed]="deletingId === list.listId"
+                  (click)="deleteList($event, list)"
+                  [matTooltip]="deletingId === list.listId ? 'Tap again to confirm delete' : 'Delete list'">
+            <mat-icon>{{ deletingId === list.listId ? 'warning' : 'delete_outline' }}</mat-icon>
+          </button>
+          <mat-icon class="arrow-icon">chevron_right</mat-icon>
+        </div>
       </mat-card-content>
     </mat-card>
-
-    <!-- Empty state -->
-    <div class="empty-state" *ngIf="filteredLists.length === 0">
-      <mat-icon>inbox</mat-icon>
-      <h3>No lists found</h3>
-      <p>{{ searchTerm ? 'Try a different search term' : 'You have no lists yet' }}</p>
-    </div>
   </div>
 
 </div>

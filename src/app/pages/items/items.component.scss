@@ -538,3 +538,29 @@ mat-paginator {
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
+
+// ─── Mobile ──────────────────────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  .page-header {
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .header-text h2 { font-size: 18px; }
+    .view-toggle { margin-right: 0; }
+    .create-btn { flex: 1; }
+  }
+
+  .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  .items-table {
+    min-width: 520px; // forces horizontal scroll rather than squashing
+  }
+
+  .cell-name { max-width: 220px; }
+  .cell-sub  { max-width: 220px; }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -10,3 +10,5 @@
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
   &.active { border-color: var(--vc); background: color-mix(in srgb, var(--vc) 10%, white); color: var(--vc); } }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 24px; border-top: 1px solid #f0f0f0; }
+
+@media (max-width: 767px) { .row-2 { grid-template-columns: 1fr; } }

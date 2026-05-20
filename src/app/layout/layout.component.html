@@ -1,4 +1,7 @@
-<div class="layout-wrapper" [class.sidebar-collapsed]="!sidebarOpen">
+<div class="layout-wrapper" [class.sidebar-collapsed]="!sidebarOpen" [class.mobile]="isMobile">
+
+  <!-- Backdrop (mobile only) -->
+  <div class="sidebar-backdrop" *ngIf="isMobile && sidebarOpen" (click)="toggleSidebar()"></div>
 
   <!-- Sidebar -->
   <aside class="sidebar">

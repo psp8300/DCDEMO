@@ -257,6 +257,49 @@ $transition: 280ms cubic-bezier(0.4, 0, 0.2, 1);
   background: $content-bg;
 }
 
+// ─── Mobile overlay sidebar ──────────────────────────────────────────────────
+
+@media (max-width: 767px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 300;
+    width: $sidebar-width !important;
+    min-width: $sidebar-width !important;
+    transform: translateX(0);
+    transition: transform $transition;
+  }
+
+  .layout-wrapper.sidebar-collapsed .sidebar {
+    width: $sidebar-width !important;
+    min-width: $sidebar-width !important;
+    transform: translateX(-100%);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 299;
+  }
+
+  .topbar {
+    height: 56px;
+    padding: 0 12px;
+
+    .page-title { font-size: 15px; }
+  }
+
+  .content-wrapper {
+    // Full width since sidebar is overlaid
+    width: 100%;
+  }
+
+  .layout-footer { display: none; }
+}
+
 // ─── Footer ──────────────────────────────────────────────────────────────────
 
 .layout-footer {
