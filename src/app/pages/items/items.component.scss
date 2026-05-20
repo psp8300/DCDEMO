@@ -240,6 +240,12 @@ $type-colors: (
 
     &:hover { background: #fafafa; }
     &:last-child td { border-bottom: none; }
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover { background: #eef2ff; }
+    }
   }
 }
 

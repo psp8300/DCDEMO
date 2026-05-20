@@ -18,6 +18,7 @@ import { MatTableModule } from '@angular/material/table';
 import { ItemsService, ItemModel, ItemType } from '../../services/items.service';
 import { AuthService } from '../../services/auth.service';
 import { CreateItemDialogComponent } from '../../dialogs/create-item/create-item-dialog.component';
+import { ItemDetailDialogComponent } from '../../dialogs/item-detail/item-detail-dialog.component';
 
 @Component({
   selector: 'app-items',
@@ -56,6 +57,17 @@ export class ItemsComponent implements OnInit, OnDestroy {
     this.loadItems();
   };
 
+  private itemUpdatedListener = () => {
+    this.loadItemTypes();
+    this.loadItems();
+  };
+
+  private itemDeletedListener = () => {
+    this.currentPage = 0;
+    this.loadItemTypes();
+    this.loadItems();
+  };
+
   constructor(
     private itemsService: ItemsService,
     private auth: AuthService,
@@ -74,6 +86,8 @@ export class ItemsComponent implements OnInit, OnDestroy {
     });
 
     window.addEventListener('dclutter:item-created', this.itemCreatedListener);
+    window.addEventListener('dclutter:item-updated', this.itemUpdatedListener);
+    window.addEventListener('dclutter:item-deleted', this.itemDeletedListener);
 
     this.loadItemTypes();
     this.loadItems();
@@ -145,8 +159,18 @@ export class ItemsComponent implements OnInit, OnDestroy {
 
   openCreateActivity() { this.openCreateItem(); }
 
+  openItemDetail(item: ItemModel) {
+    this.dialog.open(ItemDetailDialogComponent, {
+      data: { userId: this.userId, item },
+      panelClass: 'dclutter-dialog',
+      maxHeight: '90vh',
+    });
+  }
+
   ngOnDestroy() {
     window.removeEventListener('dclutter:item-created', this.itemCreatedListener);
+    window.removeEventListener('dclutter:item-updated', this.itemUpdatedListener);
+    window.removeEventListener('dclutter:item-deleted', this.itemDeletedListener);
   }
 
   goHome() {

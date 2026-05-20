@@ -110,6 +110,81 @@ export interface CreateItemResponse {
   message?: string;
 }
 
+export interface ItemDetailModel {
+  itemId: number;
+  description: string;
+  shortDescription: string;
+  itemTypeId: number | null;
+  itemTypeName: string;
+  variantId?: number;
+  variantName?: string;
+  isActive: boolean;
+  createdDate?: string;
+  lastUpdatedDate?: string;
+  // Activity
+  contactItemId?: number;
+  contactName?: string;
+  phoneNumberId?: number;
+  phoneNumber?: string;
+  meetingPlatform?: string;
+  meetingLink?: string;
+  meetingIdNumber?: string;
+  meetingPassword?: string;
+  scheduleFrom?: string;
+  scheduleTo?: string;
+  isFullDay?: boolean;
+  // Note / Knowledge
+  noteTitle?: string;
+  noteContent?: string;
+  // HyperLink
+  hyperlinkUrl?: string;
+  hyperlinkDescription?: string;
+  // Contact
+  contactIsPersonal?: boolean;
+  contactIsEmergency?: boolean;
+  contactPhone?: string;
+  contactPhoneIsWork?: boolean;
+  contactPhoneIsPrimary?: boolean;
+  contactEmail?: string;
+  contactEmailIsWork?: boolean;
+  // Credentials
+  credUsername?: string;
+  credPassword?: string;
+  credEmail?: string;
+  credPin?: string;
+  credMobile?: string;
+  credWebsite?: string;
+  // Entity
+  entityWebsiteUrl?: string;
+  entityAvailabilityHours?: string;
+  // Location
+  locationMapsLink?: string;
+  locationLatitude?: number;
+  locationLongitude?: number;
+  locationDirections?: string;
+  locationKeywords?: string;
+  // Address
+  addressHouseFlat?: string;
+  addressBuilding?: string;
+  addressArea?: string;
+  addressStreet?: string;
+  addressCity?: string;
+  addressState?: string;
+  addressPostalCode?: string;
+  addressCountry?: string;
+}
+
+export interface ItemDetailResponse {
+  success: boolean;
+  item?: ItemDetailModel;
+  message?: string;
+}
+
+export interface UpdateItemRequest extends CreateItemRequest {
+  itemId: number;
+  isActive?: boolean;
+}
+
 const TYPE_NAMES: Record<number, string> = {
   1: 'Activity',
   2: 'WorkUnit',
@@ -231,6 +306,32 @@ export class ItemsService {
       contacts = contacts.filter(c => c.name.toLowerCase().includes(q));
     }
     return of({ success: true, contacts });
+  }
+
+  getItem(_userId: number, itemId: number): Observable<ItemDetailResponse> {
+    const base = MOCK_ITEMS.find(i => i.itemId === itemId);
+    if (!base) return of({ success: false, message: 'Item not found.' });
+    const detail: ItemDetailModel = {
+      ...base,
+      variantName: 'Demo Variant',
+      noteContent: 'This is a demo item — full details are not available in the demo.',
+    };
+    return of({ success: true, item: detail });
+  }
+
+  updateItem(req: UpdateItemRequest): Observable<{ success: boolean; message?: string }> {
+    const idx = MOCK_ITEMS.findIndex(i => i.itemId === req.itemId);
+    if (idx >= 0 && req.description) {
+      MOCK_ITEMS[idx].description = req.description;
+      MOCK_ITEMS[idx].lastUpdatedDate = new Date().toISOString();
+    }
+    return of({ success: true, message: 'Item updated (demo).' });
+  }
+
+  deleteItem(_userId: number, itemId: number): Observable<{ success: boolean; message?: string }> {
+    const idx = MOCK_ITEMS.findIndex(i => i.itemId === itemId);
+    if (idx >= 0) MOCK_ITEMS.splice(idx, 1);
+    return of({ success: true, message: 'Item deleted (demo).' });
   }
 
   createItem(req: CreateItemRequest): Observable<CreateItemResponse> {

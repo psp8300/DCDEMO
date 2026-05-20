@@ -111,7 +111,7 @@
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="item-row"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="item-row clickable" (click)="openItemDetail(row)"></tr>
     </table>
 
     <div class="empty-state" *ngIf="items.length === 0">
@@ -126,7 +126,7 @@
   <div class="items-grid card-grid" *ngIf="!loading && !error && viewMode === 'card'">
 
     <ng-container *ngFor="let item of items">
-      <div class="item-card activity-card" *ngIf="item.itemTypeName === 'Activity'">
+      <div class="item-card activity-card" *ngIf="item.itemTypeName === 'Activity'" (click)="openItemDetail(item)" style="cursor:pointer">
         <div class="activity-card-body">
           <div class="activity-card-top">
             <div class="type-badge activity-badge"><mat-icon>bolt</mat-icon><span>Activity</span></div>
@@ -141,7 +141,7 @@
         </div>
       </div>
 
-      <div class="item-card regular-card" *ngIf="item.itemTypeName !== 'Activity'">
+      <div class="item-card regular-card" *ngIf="item.itemTypeName !== 'Activity'" (click)="openItemDetail(item)" style="cursor:pointer">
         <div class="card-top">
           <div class="type-badge" [attr.data-type]="item.itemTypeName">
             <mat-icon>{{ typeIcon(item.itemTypeName) }}</mat-icon>

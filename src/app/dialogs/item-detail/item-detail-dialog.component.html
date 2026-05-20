@@ -1,0 +1,590 @@
+<div class="detail-wrapper">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="detail-header">
+    <div class="type-badge" [attr.data-type]="typeName">
+      <mat-icon>{{ typeIcon(typeName) }}</mat-icon>
+      <span>{{ typeName }}</span>
+    </div>
+    <div class="header-title" [title]="dialogTitle">{{ dialogTitle }}</div>
+    <span class="header-id">#{{ data.item.itemId }}</span>
+    <button mat-icon-button class="close-btn" (click)="close()" matTooltip="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- ── Loading ─────────────────────────────────────────────────────────── -->
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner diameter="36"></mat-spinner>
+    <span>Loading details…</span>
+  </div>
+
+  <!-- ── Delete confirmation ─────────────────────────────────────────────── -->
+  <div class="delete-panel" *ngIf="!loading && mode === 'delete'">
+    <div class="delete-icon-wrap">
+      <mat-icon>delete_forever</mat-icon>
+    </div>
+    <h3>Delete this item?</h3>
+    <p>This action cannot be undone. The item will be permanently removed.</p>
+    <div class="delete-actions">
+      <button mat-stroked-button (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+      <button mat-flat-button class="btn-delete-confirm" (click)="doDelete()" [disabled]="deleting">
+        <mat-spinner *ngIf="deleting" diameter="16"></mat-spinner>
+        <mat-icon *ngIf="!deleting">delete_forever</mat-icon>
+        {{ deleting ? 'Deleting…' : 'Confirm Delete' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Content ─────────────────────────────────────────────────────────── -->
+  <div class="detail-body" *ngIf="!loading && mode !== 'delete'">
+
+    <!-- Status row (all types) -->
+    <div class="field-row" *ngIf="mode === 'view'">
+      <span class="field-label">Status</span>
+      <span class="status-chip" [class.active]="detail?.isActive">
+        <mat-icon>{{ detail?.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
+        {{ detail?.isActive ? 'Active' : 'Inactive' }}
+      </span>
+    </div>
+    <mat-checkbox class="active-check" [(ngModel)]="isActive" *ngIf="mode === 'edit'">
+      Active
+    </mat-checkbox>
+
+    <mat-divider></mat-divider>
+
+    <!-- ════════════ ACTIVITY (typeId = 1) ════════════ -->
+    <ng-container *ngIf="typeId === 1">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row">
+          <span class="field-label">Description</span>
+          <span class="field-value">{{ detail?.description || '—' }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.contactName">
+          <span class="field-label">Contact</span>
+          <span class="field-value">{{ detail?.contactName }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.phoneNumber">
+          <span class="field-label">Phone</span>
+          <span class="field-value">{{ detail?.phoneNumber }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.meetingPlatform">
+          <span class="field-label">Platform</span>
+          <span class="field-value">{{ detail?.meetingPlatform }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.meetingLink">
+          <span class="field-label">Meeting Link</span>
+          <a class="field-link" [href]="detail?.meetingLink" target="_blank">{{ detail?.meetingLink }}</a>
+        </div>
+        <div class="field-row" *ngIf="detail?.meetingIdNumber">
+          <span class="field-label">Meeting ID</span>
+          <span class="field-value">{{ detail?.meetingIdNumber }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.meetingPassword">
+          <span class="field-label">Password</span>
+          <span class="field-value">{{ detail?.meetingPassword }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.scheduleFrom">
+          <span class="field-label">From</span>
+          <span class="field-value">{{ formatDateTime(detail?.scheduleFrom) }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.scheduleTo">
+          <span class="field-label">To</span>
+          <span class="field-value">{{ formatDateTime(detail?.scheduleTo) }}</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <input matInput [(ngModel)]="description" />
+        </mat-form-field>
+        <div class="readonly-notice">
+          <mat-icon>info</mat-icon>
+          Contact / phone and schedule fields can be changed by deleting and re-creating the activity.
+        </div>
+        <mat-form-field appearance="outline" class="full-width" *ngIf="detail?.meetingPlatform !== undefined || meetingPlatform">
+          <mat-label>Meeting Platform</mat-label>
+          <input matInput [(ngModel)]="meetingPlatform" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width" *ngIf="detail?.meetingLink !== undefined || meetingLink">
+          <mat-label>Meeting Link</mat-label>
+          <input matInput [(ngModel)]="meetingLink" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width" *ngIf="detail?.meetingIdNumber !== undefined || meetingIdNumber">
+          <mat-label>Meeting ID</mat-label>
+          <input matInput [(ngModel)]="meetingIdNumber" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width" *ngIf="detail?.meetingPassword !== undefined || meetingPassword">
+          <mat-label>Password</mat-label>
+          <input matInput [(ngModel)]="meetingPassword" />
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ WORKUNIT / TASK (typeId = 2) ════════════ -->
+    <ng-container *ngIf="typeId === 2">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row">
+          <span class="field-label">Task</span>
+          <span class="field-value">{{ detail?.description || '—' }}</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Task</mat-label>
+          <textarea matInput [(ngModel)]="description" rows="3"></textarea>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ CONTACT (typeId = 3) ════════════ -->
+    <ng-container *ngIf="typeId === 3">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row">
+          <span class="field-label">Name</span>
+          <span class="field-value">{{ detail?.description || '—' }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.contactPhone">
+          <span class="field-label">Phone</span>
+          <span class="field-value">{{ detail?.contactPhone }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.contactEmail">
+          <span class="field-label">Email</span>
+          <span class="field-value">{{ detail?.contactEmail }}</span>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Type</span>
+          <span class="field-value">
+            <span class="tag" *ngIf="detail?.contactIsPersonal">Personal</span>
+            <span class="tag" *ngIf="detail?.contactIsEmergency">Emergency</span>
+            <span *ngIf="!detail?.contactIsPersonal && !detail?.contactIsEmergency">—</span>
+          </span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput [(ngModel)]="description" />
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Phone</mat-label>
+          <input matInput [(ngModel)]="contactPhone" />
+          <mat-icon matPrefix>phone</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput [(ngModel)]="contactEmail" type="email" />
+          <mat-icon matPrefix>email</mat-icon>
+        </mat-form-field>
+        <div class="check-row">
+          <mat-checkbox [(ngModel)]="contactIsPersonal">Personal</mat-checkbox>
+          <mat-checkbox [(ngModel)]="contactIsEmergency">Emergency</mat-checkbox>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ DOCUMENT (typeId = 4) ════════════ -->
+    <ng-container *ngIf="typeId === 4">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row">
+          <span class="field-label">Details</span>
+          <span class="field-value preformat">{{ detail?.description || '—' }}</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Document Details</mat-label>
+          <textarea matInput [(ngModel)]="description" rows="4"></textarea>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ CREDENTIALS (typeId = 5) ════════════ -->
+    <ng-container *ngIf="typeId === 5">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row">
+          <span class="field-label">Name</span>
+          <span class="field-value">{{ detail?.description || '—' }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.credWebsite">
+          <span class="field-label">Website</span>
+          <a class="field-link" [href]="detail?.credWebsite" target="_blank">{{ detail?.credWebsite }}</a>
+        </div>
+        <div class="field-row" *ngIf="detail?.credUsername">
+          <span class="field-label">Username</span>
+          <span class="field-value copy-value">{{ detail?.credUsername }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.credPassword">
+          <span class="field-label">Password</span>
+          <span class="field-value masked">{{ showPassword ? detail?.credPassword : '••••••••' }}</span>
+          <button mat-icon-button class="reveal-btn" (click)="showPassword = !showPassword" matTooltip="Toggle visibility">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+        <div class="field-row" *ngIf="detail?.credEmail">
+          <span class="field-label">Email</span>
+          <span class="field-value">{{ detail?.credEmail }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.credMobile">
+          <span class="field-label">Mobile</span>
+          <span class="field-value">{{ detail?.credMobile }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.credPin">
+          <span class="field-label">PIN</span>
+          <span class="field-value masked">{{ showPin ? detail?.credPin : '••••' }}</span>
+          <button mat-icon-button class="reveal-btn" (click)="showPin = !showPin" matTooltip="Toggle visibility">
+            <mat-icon>{{ showPin ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Name / Site</mat-label>
+          <input matInput [(ngModel)]="description" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Website</mat-label>
+          <input matInput [(ngModel)]="credWebsite" />
+          <mat-icon matPrefix>language</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput [(ngModel)]="credUsername" />
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput [(ngModel)]="credPassword" [type]="showPassword ? 'text' : 'password'" />
+          <button mat-icon-button matSuffix (click)="showPassword = !showPassword" type="button">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput [(ngModel)]="credEmail" type="email" />
+          <mat-icon matPrefix>email</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Mobile</mat-label>
+          <input matInput [(ngModel)]="credMobile" />
+          <mat-icon matPrefix>phone_android</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>PIN</mat-label>
+          <input matInput [(ngModel)]="credPin" [type]="showPin ? 'text' : 'password'" />
+          <button mat-icon-button matSuffix (click)="showPin = !showPin" type="button">
+            <mat-icon>{{ showPin ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ NOTES (typeId = 6) ════════════ -->
+    <ng-container *ngIf="typeId === 6">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row" *ngIf="detail?.noteTitle">
+          <span class="field-label">Title</span>
+          <span class="field-value">{{ detail?.noteTitle }}</span>
+        </div>
+        <div class="field-row tall">
+          <span class="field-label">Content</span>
+          <span class="field-value preformat">{{ detail?.noteContent || detail?.description || '—' }}</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Title <span class="optional">(optional)</span></mat-label>
+          <input matInput [(ngModel)]="noteTitle" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Content</mat-label>
+          <textarea matInput [(ngModel)]="noteContent" rows="8"></textarea>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ HYPERLINK (typeId = 7) ════════════ -->
+    <ng-container *ngIf="typeId === 7">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row">
+          <span class="field-label">Name</span>
+          <span class="field-value">{{ detail?.description || '—' }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.hyperlinkUrl">
+          <span class="field-label">URL</span>
+          <a class="field-link" [href]="detail?.hyperlinkUrl" target="_blank">{{ detail?.hyperlinkUrl }}</a>
+        </div>
+        <div class="field-row" *ngIf="detail?.hyperlinkDescription">
+          <span class="field-label">Description</span>
+          <span class="field-value">{{ detail?.hyperlinkDescription }}</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput [(ngModel)]="description" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>URL</mat-label>
+          <input matInput [(ngModel)]="hyperlinkUrl" />
+          <mat-icon matPrefix>link</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description <span class="optional">(optional)</span></mat-label>
+          <input matInput [(ngModel)]="hyperlinkDescription" />
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ ENTITY (typeId = 8) ════════════ -->
+    <ng-container *ngIf="typeId === 8">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row">
+          <span class="field-label">Name</span>
+          <span class="field-value">{{ detail?.description || '—' }}</span>
+        </div>
+        <div class="field-row" *ngIf="detail?.entityWebsiteUrl">
+          <span class="field-label">Website</span>
+          <a class="field-link" [href]="detail?.entityWebsiteUrl" target="_blank">{{ detail?.entityWebsiteUrl }}</a>
+        </div>
+        <div class="field-row" *ngIf="detail?.entityAvailabilityHours">
+          <span class="field-label">Hours</span>
+          <span class="field-value preformat">{{ detail?.entityAvailabilityHours }}</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput [(ngModel)]="description" />
+          <mat-icon matPrefix>business</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Website</mat-label>
+          <input matInput [(ngModel)]="entityWebsiteUrl" />
+          <mat-icon matPrefix>language</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Availability Hours</mat-label>
+          <textarea matInput [(ngModel)]="entityAvailabilityHours" rows="3"></textarea>
+          <mat-icon matPrefix>schedule</mat-icon>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ LOCATION (typeId = 9) ════════════ -->
+    <ng-container *ngIf="typeId === 9">
+
+      <!-- Location variant (var 30) -->
+      <ng-container *ngIf="!isAddress">
+        <ng-container *ngIf="mode === 'view'">
+          <div class="field-row">
+            <span class="field-label">Name</span>
+            <span class="field-value">{{ detail?.description || '—' }}</span>
+          </div>
+          <div class="field-row" *ngIf="detail?.locationMapsLink">
+            <span class="field-label">Maps Link</span>
+            <a class="field-link" [href]="detail?.locationMapsLink" target="_blank">Open in Maps</a>
+          </div>
+          <div class="field-row" *ngIf="detail?.locationLatitude">
+            <span class="field-label">Coordinates</span>
+            <span class="field-value">{{ detail?.locationLatitude }}, {{ detail?.locationLongitude }}</span>
+          </div>
+          <div class="field-row" *ngIf="detail?.locationDirections">
+            <span class="field-label">Directions</span>
+            <span class="field-value preformat">{{ detail?.locationDirections }}</span>
+          </div>
+          <div class="field-row" *ngIf="detail?.locationKeywords">
+            <span class="field-label">Keywords</span>
+            <span class="field-value">{{ detail?.locationKeywords }}</span>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="mode === 'edit'">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="description" />
+            <mat-icon matPrefix>place</mat-icon>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Maps Link</mat-label>
+            <input matInput [(ngModel)]="locationMapsLink" />
+            <mat-icon matPrefix>map</mat-icon>
+          </mat-form-field>
+          <div class="two-col">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Latitude</mat-label>
+              <input matInput [(ngModel)]="locationLatitude" type="number" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Longitude</mat-label>
+              <input matInput [(ngModel)]="locationLongitude" type="number" />
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Directions</mat-label>
+            <textarea matInput [(ngModel)]="locationDirections" rows="3"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Keywords</mat-label>
+            <input matInput [(ngModel)]="locationKeywords" />
+          </mat-form-field>
+        </ng-container>
+      </ng-container>
+
+      <!-- Address variant (var 35) -->
+      <ng-container *ngIf="isAddress">
+        <ng-container *ngIf="mode === 'view'">
+          <div class="field-row">
+            <span class="field-label">Name</span>
+            <span class="field-value">{{ detail?.description || '—' }}</span>
+          </div>
+          <div class="field-row address-block">
+            <span class="field-label">Address</span>
+            <div class="address-lines">
+              <span *ngIf="detail?.addressHouseFlat">{{ detail?.addressHouseFlat }}</span>
+              <span *ngIf="detail?.addressBuilding">{{ detail?.addressBuilding }}</span>
+              <span *ngIf="detail?.addressArea">{{ detail?.addressArea }}</span>
+              <span *ngIf="detail?.addressStreet">{{ detail?.addressStreet }}</span>
+              <span *ngIf="detail?.addressCity || detail?.addressState">{{ detail?.addressCity }}{{ detail?.addressCity && detail?.addressState ? ', ' : '' }}{{ detail?.addressState }}</span>
+              <span *ngIf="detail?.addressPostalCode">{{ detail?.addressPostalCode }}</span>
+              <span *ngIf="detail?.addressCountry">{{ detail?.addressCountry }}</span>
+            </div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="mode === 'edit'">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="description" />
+          </mat-form-field>
+          <div class="two-col">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>House / Flat</mat-label>
+              <input matInput [(ngModel)]="addressHouseFlat" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Building</mat-label>
+              <input matInput [(ngModel)]="addressBuilding" />
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Area</mat-label>
+            <input matInput [(ngModel)]="addressArea" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Street</mat-label>
+            <input matInput [(ngModel)]="addressStreet" />
+          </mat-form-field>
+          <div class="two-col">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>City</mat-label>
+              <input matInput [(ngModel)]="addressCity" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>State</mat-label>
+              <input matInput [(ngModel)]="addressState" />
+            </mat-form-field>
+          </div>
+          <div class="two-col">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Postal Code</mat-label>
+              <input matInput [(ngModel)]="addressPostalCode" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Country</mat-label>
+              <input matInput [(ngModel)]="addressCountry" />
+            </mat-form-field>
+          </div>
+        </ng-container>
+      </ng-container>
+
+    </ng-container>
+
+    <!-- ════════════ KNOWLEDGE REPO (typeId = 10) ════════════ -->
+    <ng-container *ngIf="typeId === 10">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row tall">
+          <span class="field-label">Content</span>
+          <span class="field-value preformat">{{ detail?.description || '—' }}</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Content</mat-label>
+          <textarea matInput [(ngModel)]="description" rows="10"></textarea>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ MONEY (typeId = 12) ════════════ -->
+    <ng-container *ngIf="typeId === 12">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row">
+          <span class="field-label">Details</span>
+          <span class="field-value preformat">{{ detail?.description || '—' }}</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Details</mat-label>
+          <textarea matInput [(ngModel)]="description" rows="3"></textarea>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- ════════════ Fallback for unknown types ════════════ -->
+    <ng-container *ngIf="typeId !== 1 && typeId !== 2 && typeId !== 3 && typeId !== 4 &&
+                         typeId !== 5 && typeId !== 6 && typeId !== 7 && typeId !== 8 &&
+                         typeId !== 9 && typeId !== 10 && typeId !== 12">
+      <ng-container *ngIf="mode === 'view'">
+        <div class="field-row tall">
+          <span class="field-label">Details</span>
+          <span class="field-value preformat">{{ detail?.description || '—' }}</span>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="mode === 'edit'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Details</mat-label>
+          <textarea matInput [(ngModel)]="description" rows="4"></textarea>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <!-- Timestamps (view mode always) -->
+    <ng-container *ngIf="mode === 'view'">
+      <mat-divider style="margin-top:8px"></mat-divider>
+      <div class="timestamps">
+        <span *ngIf="detail?.createdDate">Created {{ formatDate(detail?.createdDate) }}</span>
+        <span *ngIf="detail?.lastUpdatedDate">· Updated {{ formatDate(detail?.lastUpdatedDate) }}</span>
+      </div>
+    </ng-container>
+
+  </div>
+
+  <!-- ── Footer ───────────────────────────────────────────────────────────── -->
+  <div class="detail-footer" *ngIf="!loading && mode !== 'delete'">
+
+    <!-- Delete button (view mode only) -->
+    <button mat-stroked-button class="btn-delete" (click)="confirmDelete()" *ngIf="mode === 'view'">
+      <mat-icon>delete</mat-icon> Delete
+    </button>
+
+    <span class="footer-spacer"></span>
+
+    <!-- View mode: Edit -->
+    <button mat-flat-button class="btn-edit" (click)="enterEditMode()" *ngIf="mode === 'view'">
+      <mat-icon>edit</mat-icon> Edit
+    </button>
+
+    <!-- Edit mode: Cancel + Save -->
+    <ng-container *ngIf="mode === 'edit'">
+      <button mat-stroked-button (click)="cancelEdit()" [disabled]="saving">Cancel</button>
+      <button mat-flat-button class="btn-save" (click)="save()" [disabled]="saving">
+        <mat-spinner *ngIf="saving" diameter="16"></mat-spinner>
+        <mat-icon *ngIf="!saving">save</mat-icon>
+        {{ saving ? 'Saving…' : 'Save Changes' }}
+      </button>
+    </ng-container>
+
+  </div>
+
+</div>
