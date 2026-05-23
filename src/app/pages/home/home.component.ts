@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -52,8 +52,9 @@ const ACTIVITY_PALETTE = ['#6366f1','#10b981','#f59e0b','#8b5cf6','#ef4444','#06
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   user: UserInfo | null = null;
+  private watermarkEl: HTMLElement | null = null;
 
   // Stats
   totalItems = 0;
@@ -87,9 +88,15 @@ export class HomeComponent implements OnInit {
     private auth: AuthService,
     private activityService: ActivityService,
     private itemsService: ItemsService,
+    private renderer: Renderer2,
   ) {}
 
   ngOnInit(): void {
+    // Inject watermark directly onto body — bypasses any layout overflow/transform containment
+    this.watermarkEl = this.renderer.createElement('div');
+    this.renderer.addClass(this.watermarkEl!, 'psp-watermark');
+    this.renderer.appendChild(document.body, this.watermarkEl!);
+
     this.user = this.auth.getUser();
     if (!this.user) return;
     const userId = this.user.userId;
@@ -118,6 +125,13 @@ export class HomeComponent implements OnInit {
       this.activitiesToday = this.allActivities.filter(a => a.date?.startsWith(today)).length;
       this.upcomingCount   = this.allActivities.filter(a => a.date && a.date > today).length;
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.watermarkEl) {
+      this.renderer.removeChild(document.body, this.watermarkEl);
+      this.watermarkEl = null;
+    }
   }
 
   private buildDonut(types: ItemType[]): void {
