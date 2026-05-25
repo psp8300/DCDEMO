@@ -75,6 +75,69 @@
   gap: 8px;
 }
 
+.demo-hint {
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 16px;
+}
+
+.demo-hint-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.demo-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.demo-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all 140ms ease;
+  text-align: left;
+  width: 100%;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; color: #6b7280; flex-shrink: 0; }
+
+  .chip-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    min-width: 76px;
+  }
+
+  .chip-cred {
+    font-size: 12px;
+    color: #9ca3af;
+    font-family: monospace;
+  }
+
+  &:hover {
+    background: #eef2ff;
+    border-color: #6366f1;
+    mat-icon { color: #6366f1; }
+    .chip-label { color: #4f46e5; }
+  }
+
+  &.manager-chip {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    mat-icon { color: #d97706; }
+  }
+}
+
 @media (max-width: 767px) {
   .login-container { padding: 20px 16px; align-items: flex-start; padding-top: 60px; }
   .login-card { width: 100%; padding: 28px 20px; }

@@ -22,16 +22,32 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/lists/lists.component').then(m => m.ListsComponent)
       },
       {
-        path: 'activity',
-        loadComponent: () => import('./pages/activity/activity.component').then(m => m.ActivityComponent)
-      },
-      {
         path: 'items',
         loadComponent: () => import('./pages/items/items.component').then(m => m.ItemsComponent)
       },
       {
+        path: 'activity',
+        loadComponent: () => import('./pages/activity/activity.component').then(m => m.ActivityComponent)
+      },
+      {
         path: 'schedule',
         loadComponent: () => import('./pages/schedule/schedule.component').then(m => m.ScheduleComponent)
+      },
+      {
+        path: 'workday',
+        loadComponent: () => import('./pages/workday/workday.component').then(m => m.WorkdayComponent)
+      },
+      {
+        path: 'attendance',
+        loadComponent: () => import('./pages/attendance/attendance.component').then(m => m.AttendanceComponent)
+      },
+      {
+        path: 'workforce',
+        loadComponent: () => import('./pages/workforce/workforce.component').then(m => m.WorkforceComponent)
+      },
+      {
+        path: 'live-status',
+        loadComponent: () => import('./pages/live-status/live-status.component').then(m => m.LiveStatusComponent)
       },
     ]
   },

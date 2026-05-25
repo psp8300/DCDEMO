@@ -1,0 +1,93 @@
+<div class="att-page">
+
+  <!-- ── Controls ──────────────────────────────────────────────── -->
+  <div class="controls-row">
+    <!-- Period tabs -->
+    <div class="period-tabs">
+      <button [class.active]="period === 'day'"   (click)="setPeriod('day')">Day</button>
+      <button [class.active]="period === 'week'"  (click)="setPeriod('week')">Week</button>
+      <button [class.active]="period === 'month'" (click)="setPeriod('month')">Month</button>
+    </div>
+
+    <!-- Date navigation -->
+    <div class="date-nav">
+      <button mat-icon-button (click)="prev()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="period-label">{{ periodLabel }}</span>
+      <button mat-icon-button (click)="next()" [disabled]="isCurrentPeriod">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <button mat-icon-button (click)="goCurrentPeriod()" [disabled]="isCurrentPeriod" matTooltip="Current period">
+        <mat-icon>today</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────────── -->
+  <div class="loading-wrap" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ── Summary strip ────────────────────────────────────────── -->
+    <div class="summary-strip" *ngIf="records.length > 0">
+      <div class="sum-item">
+        <span class="sum-lbl">Days Present</span>
+        <span class="sum-val">{{ totalPresent }}</span>
+      </div>
+      <div class="sum-item">
+        <span class="sum-lbl">Total Net Time</span>
+        <span class="sum-val primary">{{ formatDuration(totalNetMins) }}</span>
+      </div>
+      <div class="sum-item">
+        <span class="sum-lbl">Total Earnings</span>
+        <span class="sum-val earnings">{{ formatEarnings(totalEarnings) }}</span>
+      </div>
+    </div>
+
+    <!-- ── Empty ─────────────────────────────────────────────────── -->
+    <div class="empty-state" *ngIf="records.length === 0">
+      <mat-icon>event_busy</mat-icon>
+      <p>No attendance records for this period.</p>
+    </div>
+
+    <!-- ── Table ─────────────────────────────────────────────────── -->
+    <div class="table-card" *ngIf="records.length > 0">
+      <table class="att-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Login</th>
+            <th>Logout</th>
+            <th>Duration</th>
+            <th>Breaks</th>
+            <th>Net Time</th>
+            <th>Earnings</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of records" [class.active-row]="r.status === 'Active'">
+            <td class="date-cell">{{ formatDate(r.sessionDate) }}</td>
+            <td>{{ r.location }}</td>
+            <td>{{ formatTime(r.loginTime) }}</td>
+            <td>{{ formatTime(r.logoutTime) }}</td>
+            <td>{{ formatDuration(r.totalDurationMins) }}</td>
+            <td class="breaks-cell">{{ formatDuration(r.breakDurationMins) }}</td>
+            <td class="net-cell">{{ formatDuration(r.netTimeMins) }}</td>
+            <td class="earn-cell">{{ formatEarnings(r.earnings) }}</td>
+            <td>
+              <span class="status-chip" [class.active]="r.status === 'Active'" [class.done]="r.status === 'Completed'">
+                {{ r.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </ng-container>
+</div>

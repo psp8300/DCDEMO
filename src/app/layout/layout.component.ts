@@ -14,6 +14,7 @@ interface NavItem {
   label: string;
   icon: string;
   route: string;
+  requireRole?: 'Manager' | 'Employee';
 }
 
 @Component({
@@ -38,12 +39,21 @@ export class LayoutComponent implements OnInit, OnDestroy {
   pageTitle = 'Dashboard';
 
   navItems: NavItem[] = [
-    { id: 'home',     label: 'Dashboard',   icon: 'dashboard',      route: '/home' },
-    { id: 'lists',    label: 'Lists',        icon: 'list_alt',       route: '/lists' },
-    { id: 'items',    label: 'Items',        icon: 'inventory_2',    route: '/items' },
-    { id: 'activity', label: 'Activity Log', icon: 'history',        route: '/activity' },
-    { id: 'schedule', label: 'Schedule',     icon: 'calendar_month', route: '/schedule' },
+    { id: 'home',       label: 'Dashboard',   icon: 'dashboard',        route: '/home' },
+    { id: 'lists',      label: 'Lists',        icon: 'list_alt',         route: '/lists' },
+    { id: 'items',      label: 'Items',        icon: 'inventory_2',      route: '/items' },
+    { id: 'activity',   label: 'Activity Log', icon: 'history',          route: '/activity' },
+    { id: 'schedule',   label: 'Schedule',     icon: 'calendar_month',   route: '/schedule' },
+    { id: 'workday',    label: 'Workday',      icon: 'timer',            route: '/workday' },
+    { id: 'attendance', label: 'Attendance',   icon: 'fact_check',       route: '/attendance' },
+    { id: 'workforce',  label: 'Workforce',    icon: 'groups',           route: '/workforce',    requireRole: 'Manager' },
+    { id: 'live-status', label: "Who's Doing What", icon: 'supervisor_account', route: '/live-status', requireRole: 'Manager' },
   ];
+
+  get visibleNavItems(): NavItem[] {
+    const role = this.user?.role;
+    return this.navItems.filter(n => !n.requireRole || n.requireRole === role);
+  }
 
   private routerSub!: Subscription;
 

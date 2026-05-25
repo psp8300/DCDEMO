@@ -31,6 +31,19 @@
         <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
         <span *ngIf="!loading">Sign In</span>
       </button>
+
+      <div class="demo-hint">
+        <div class="demo-hint-label">Demo accounts — click to fill</div>
+        <div class="demo-chips">
+          <button *ngFor="let acc of demoAccounts" class="demo-chip"
+                  [class.manager-chip]="acc.label === 'Manager'"
+                  (click)="quickFill(acc.email, acc.password)" type="button">
+            <mat-icon>{{ acc.icon }}</mat-icon>
+            <span class="chip-label">{{ acc.label }}</span>
+            <span class="chip-cred">{{ acc.email }}</span>
+          </button>
+        </div>
+      </div>
     </mat-card-content>
   </mat-card>
 </div>

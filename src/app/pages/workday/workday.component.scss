@@ -1,0 +1,366 @@
+.workday-page {
+  padding: 24px;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+
+.wd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.date-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .date-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    min-width: 140px;
+    text-align: center;
+  }
+}
+
+.location-toggle {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+
+  .loc-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: none;
+    background: transparent;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 160ms ease;
+    font-family: 'Inter', sans-serif;
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+    &:hover { color: #111827; }
+    &.active {
+      background: #fff;
+      color: #6366f1;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  }
+}
+
+// ─── Loading ─────────────────────────────────────────────────────────────────
+
+.loading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+
+// ─── State cards ─────────────────────────────────────────────────────────────
+
+.state-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 12px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #d1d5db;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+  }
+
+  &.not-started mat-icon { color: #6366f1; }
+}
+
+// ─── Action bar ──────────────────────────────────────────────────────────────
+
+.action-bar {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.current-act {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 4px solid #10b981;
+  padding-left: 14px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.act-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon { font-size: 24px; width: 24px; height: 24px; }
+}
+
+.act-type {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.act-elapsed {
+  font-size: 13px;
+  color: #6b7280;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+.action-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+// ── Activity menu items ──────────────────────────────────────────────────────
+
+::ng-deep .activity-menu .mat-mdc-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+  padding: 0 12px;
+
+  &.active-opt {
+    background: #f9fafb;
+    opacity: 0.7;
+    cursor: default;
+  }
+}
+
+.menu-opt-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+.menu-opt-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.check-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #6366f1;
+  margin-left: auto;
+}
+
+// ─── Restart bar ─────────────────────────────────────────────────────────────
+
+.restart-bar {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.completed-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #16a34a;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+}
+
+// ─── Attendance card ─────────────────────────────────────────────────────────
+
+.att-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  padding: 20px;
+}
+
+.att-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+
+  @media (max-width: 800px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.att-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  background: #f9fafb;
+  border-radius: 10px;
+  gap: 4px;
+}
+
+.att-lbl {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.att-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+
+  &.primary { color: #6366f1; }
+  &.warn    { color: #f59e0b; }
+  &.earnings { color: #16a34a; font-size: 16px; }
+}
+
+// ─── Section card ─────────────────────────────────────────────────────────────
+
+.section-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  overflow: hidden;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; color: #6366f1; }
+}
+
+.task-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6366f1;
+  background: #eef2ff;
+  border-bottom: 1px solid #e0e7ff;
+
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+}
+
+// ─── History table ────────────────────────────────────────────────────────────
+
+.hist-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    padding: 8px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #f3f4f6;
+    background: #fafafa;
+  }
+
+  td {
+    padding: 10px 16px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: #fafafa; }
+
+  .dur-cell {
+    font-weight: 600;
+    color: #111827;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// ─── Break badge ─────────────────────────────────────────────────────────────
+
+.break-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px 3px 6px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+
+  mat-icon { font-size: 13px; width: 13px; height: 13px; }
+}

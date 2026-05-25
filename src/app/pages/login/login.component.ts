@@ -8,6 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -26,8 +27,21 @@ export class LoginComponent {
   hidePassword = true;
   loading = false;
   errorMessage = '';
+  readonly demoMode = environment.demo;
+
+  readonly demoAccounts = [
+    { label: 'Manager', email: 'manager@dc.com', password: 'dcm', icon: 'manage_accounts' },
+    { label: 'Employee 1', email: 'employee1@dc.com', password: 'dce1', icon: 'person' },
+    { label: 'Employee 2', email: 'employee2@dc.com', password: 'dce2', icon: 'person_outline' },
+  ];
 
   constructor(private auth: AuthService, private router: Router) {}
+
+  quickFill(email: string, password: string): void {
+    this.email = email;
+    this.password = password;
+    this.errorMessage = '';
+  }
 
   onLogin() {
     if (!this.email || !this.password) {

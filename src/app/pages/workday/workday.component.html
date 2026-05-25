@@ -1,0 +1,208 @@
+<div class="workday-page">
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <div class="wd-header">
+    <div class="date-nav">
+      <button mat-icon-button (click)="prevDay()" matTooltip="Previous day">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="date-label">{{ formatDate(viewDate) }}</span>
+      <button mat-icon-button (click)="nextDay()" [disabled]="isToday" matTooltip="Next day">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <button mat-icon-button (click)="goToday()" [disabled]="isToday" matTooltip="Today">
+        <mat-icon>today</mat-icon>
+      </button>
+    </div>
+
+    <div class="location-toggle">
+      <button class="loc-btn" [class.active]="location === 'Office'" (click)="setLocation('Office')">
+        <mat-icon>business</mat-icon> Office
+      </button>
+      <button class="loc-btn" [class.active]="location === 'Home'" (click)="setLocation('Home')">
+        <mat-icon>home</mat-icon> Home
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────────── -->
+  <div class="loading-wrap" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ── Not started (today only) ─────────────────────────────── -->
+    <div class="state-card not-started" *ngIf="!session && isToday">
+      <mat-icon>work_outline</mat-icon>
+      <h3>Workday not started</h3>
+      <p>You haven't started your workday yet. Click below to begin.</p>
+      <button mat-raised-button color="primary" (click)="startWorkday()" [disabled]="actionLoading">
+        <mat-icon>play_circle</mat-icon>
+        Start Workday
+      </button>
+    </div>
+
+    <!-- ── No record (past date) ────────────────────────────────── -->
+    <div class="state-card no-record" *ngIf="!session && !isToday">
+      <mat-icon>event_busy</mat-icon>
+      <p>No workday record for this date.</p>
+    </div>
+
+    <!-- ── Session exists ───────────────────────────────────────── -->
+    <ng-container *ngIf="session">
+
+      <!-- Active controls bar -->
+      <div class="action-bar" *ngIf="sessionActive && isToday && currentActivity">
+
+        <!-- Current activity indicator -->
+        <div class="current-act" [style.border-left-color]="activityColor(currentActivity.activityType)">
+          <div class="act-icon-wrap" [style.background]="activityColor(currentActivity.activityType) + '22'">
+            <mat-icon [style.color]="activityColor(currentActivity.activityType)">
+              {{ activityIcon(currentActivity.activityType) }}
+            </mat-icon>
+          </div>
+          <div class="act-info">
+            <div class="act-type">{{ activityLabel(currentActivity.activityType) }}</div>
+            <div class="act-elapsed">{{ elapsedDisplay }}</div>
+          </div>
+        </div>
+
+        <div class="action-btns">
+          <!-- Change Activity dropdown -->
+          <button mat-stroked-button [matMenuTriggerFor]="activityMenu" [disabled]="actionLoading">
+            <mat-icon>swap_horiz</mat-icon> Change Activity
+          </button>
+          <mat-menu #activityMenu="matMenu" class="activity-menu">
+            <button mat-menu-item
+                    *ngFor="let opt of activityOptions"
+                    (click)="changeActivity(opt)"
+                    [disabled]="isCurrentActivity(opt)"
+                    [class.active-opt]="isCurrentActivity(opt)">
+              <div class="menu-opt-icon" [style.background]="activityColor(opt) + '22'">
+                <mat-icon [style.color]="activityColor(opt)">{{ activityIcon(opt) }}</mat-icon>
+              </div>
+              <span class="menu-opt-label">{{ activityLabel(opt) }}</span>
+              <mat-icon class="check-icon" *ngIf="isCurrentActivity(opt)">check</mat-icon>
+            </button>
+          </mat-menu>
+
+          <!-- End workday -->
+          <button mat-raised-button color="warn" (click)="endWorkday()" [disabled]="actionLoading">
+            <mat-icon>stop_circle</mat-icon>
+            End Workday
+          </button>
+        </div>
+      </div>
+
+      <!-- Restart button (today, session completed) -->
+      <div class="restart-bar" *ngIf="!sessionActive && isToday">
+        <span class="completed-badge">
+          <mat-icon>check_circle</mat-icon> Workday completed
+        </span>
+        <button mat-stroked-button color="primary" (click)="startWorkday()" [disabled]="actionLoading">
+          <mat-icon>replay</mat-icon> Restart Workday
+        </button>
+      </div>
+
+      <!-- Attendance summary card -->
+      <div class="att-card" *ngIf="attendance">
+        <div class="att-grid">
+          <div class="att-item">
+            <span class="att-lbl">Login</span>
+            <span class="att-val">{{ formatTime(attendance.loginTime) }}</span>
+          </div>
+          <div class="att-item">
+            <span class="att-lbl">Logout</span>
+            <span class="att-val">{{ formatTime(attendance.logoutTime) }}</span>
+          </div>
+          <div class="att-item">
+            <span class="att-lbl">Duration</span>
+            <span class="att-val">{{ formatDuration(attendance.totalDurationMins) }}</span>
+          </div>
+          <div class="att-item">
+            <span class="att-lbl">Breaks</span>
+            <span class="att-val warn">{{ formatDuration(attendance.breakDurationMins) }}</span>
+          </div>
+          <div class="att-item">
+            <span class="att-lbl">Net Time</span>
+            <span class="att-val primary">{{ formatDuration(attendance.netTimeMins) }}</span>
+          </div>
+          <div class="att-item">
+            <span class="att-lbl">Earnings</span>
+            <span class="att-val earnings">{{ formatEarnings(attendance.earnings) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Work History -->
+      <div class="section-card" *ngIf="workActivities.length > 0">
+        <div class="section-title">
+          <mat-icon>computer</mat-icon> Work History
+        </div>
+
+        <ng-container *ngFor="let group of taskGroups">
+          <div class="task-header" *ngIf="group.taskId != null">
+            <mat-icon>task_alt</mat-icon>
+            {{ group.taskName ?? 'Task #' + group.taskId }}
+          </div>
+          <table class="hist-table">
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Activity</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let act of group.activities">
+                <td>{{ act.location }}</td>
+                <td>{{ activityLabel(act.activityType) }}</td>
+                <td>{{ formatTime(act.startTime) }}</td>
+                <td>{{ formatTime(act.endTime) }}</td>
+                <td class="dur-cell">{{ formatDuration(act.durationMinutes) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </ng-container>
+      </div>
+
+      <!-- Break History -->
+      <div class="section-card" *ngIf="breakActivities.length > 0">
+        <div class="section-title">
+          <mat-icon>pause_circle</mat-icon> Breaks
+        </div>
+        <table class="hist-table">
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Type</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let act of breakActivities">
+              <td>{{ act.location }}</td>
+              <td>
+                <span class="break-badge"
+                      [style.background]="activityColor(act.activityType) + '22'"
+                      [style.color]="activityColor(act.activityType)">
+                  <mat-icon>{{ activityIcon(act.activityType) }}</mat-icon>
+                  {{ activityLabel(act.activityType) }}
+                </span>
+              </td>
+              <td>{{ formatTime(act.startTime) }}</td>
+              <td>{{ formatTime(act.endTime) }}</td>
+              <td class="dur-cell">{{ formatDuration(act.durationMinutes) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </ng-container>
+  </ng-container>
+</div>

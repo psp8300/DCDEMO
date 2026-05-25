@@ -1,0 +1,316 @@
+.workforce-page {
+  padding: 24px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.wf-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  align-items: start;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Team panel ───────────────────────────────────────────────────────────────
+
+.team-panel {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  overflow: hidden;
+  position: sticky;
+  top: 16px;
+}
+
+.team-header {
+  padding: 14px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.loading-sm {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 150ms ease;
+
+  &:hover { background: #f9fafb; }
+  &.active { background: #eef2ff; }
+}
+
+.member-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #6366f1;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &.all-avatar {
+    background: #f3f4f6;
+    color: #6b7280;
+    mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  }
+}
+
+.member-info {
+  min-width: 0;
+}
+
+.member-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-role {
+  font-size: 11px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.role-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  background: #f3f4f6;
+  color: #6b7280;
+
+  &.manager { background: #fef3c7; color: #d97706; }
+}
+
+.member-divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 4px 0;
+}
+
+// ─── Content panel ────────────────────────────────────────────────────────────
+
+.content-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.period-tabs {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+
+  button {
+    border: none;
+    background: transparent;
+    padding: 5px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 160ms ease;
+    font-family: 'Inter', sans-serif;
+
+    &:hover  { color: #111827; }
+    &.active { background: #fff; color: #6366f1; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  }
+}
+
+.date-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .period-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+    min-width: 220px;
+    text-align: center;
+  }
+}
+
+.loading-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+// ─── Summary strip ────────────────────────────────────────────────────────────
+
+.summary-strip {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sum-item {
+  flex: 1;
+  min-width: 130px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sum-lbl {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sum-val {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+
+  &.primary  { color: #6366f1; }
+  &.earnings { color: #16a34a; font-size: 18px; }
+}
+
+// ─── Empty ────────────────────────────────────────────────────────────────────
+
+.empty-state {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 12px;
+  color: #9ca3af;
+
+  mat-icon { font-size: 40px; width: 40px; height: 40px; color: #d1d5db; }
+  p { margin: 0; font-size: 14px; }
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+
+.table-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  overflow: auto;
+}
+
+.wf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 900px;
+
+  th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid #f3f4f6;
+    background: #fafafa;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 10px 12px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+    white-space: nowrap;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+
+  .member-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .date-cell  { font-weight: 600; color: #111827; }
+  .net-cell   { font-weight: 700; color: #6366f1; }
+  .breaks-cell { color: #f59e0b; font-weight: 600; }
+  .earn-cell  { font-weight: 700; color: #16a34a; }
+  .rate-cell  { color: #6b7280; }
+}
+
+.mini-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #6366f1;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.status-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #f3f4f6;
+  color: #6b7280;
+
+  &.active { background: #fef3c7; color: #d97706; }
+  &.done   { background: #dcfce7; color: #16a34a; }
+}

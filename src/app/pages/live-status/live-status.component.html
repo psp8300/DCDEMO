@@ -1,0 +1,392 @@
+<div class="live-page">
+
+  <!-- Header -->
+  <div class="live-header">
+    <div class="header-title">
+      <mat-icon>supervisor_account</mat-icon>
+      <span>Who's Doing What</span>
+    </div>
+    <div class="header-actions">
+      <span class="last-updated">{{ lastRefreshed | date:'HH:mm:ss' }}</span>
+      <button mat-icon-button (click)="refresh()" matTooltip="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- View tabs -->
+  <div class="view-tabs">
+    <button class="view-tab" [class.active]="viewMode === 'cards'" (click)="viewMode = 'cards'">
+      <mat-icon>dashboard</mat-icon> Live Cards
+    </button>
+    <button class="view-tab" [class.active]="viewMode === 'table'" (click)="viewMode = 'table'">
+      <mat-icon>table_rows</mat-icon> Table View
+    </button>
+  </div>
+
+  <div class="loading-wrap" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div class="live-body" *ngIf="!loading && viewMode === 'cards'">
+
+    <!-- ── Left: Employee list ──────────────────────────────────────── -->
+    <div class="members-panel">
+      <div class="member-card"
+           *ngFor="let m of members"
+           [class.selected]="selectedMember?.userId === m.userId"
+           (click)="selectMember(m)">
+
+        <!-- Identity row -->
+        <div class="member-row">
+          <div class="avatar-wrap">
+            <div class="avatar" [style.border-color]="statusDot(m.sessionStatus)">{{ initials(m.displayName) }}</div>
+            <span class="status-dot" [style.background]="statusDot(m.sessionStatus)"></span>
+          </div>
+          <div class="member-info">
+            <div class="member-name">{{ m.displayName }}</div>
+            <div class="member-meta">
+              <span class="role-badge" [class.manager]="m.role === 'Manager'">{{ m.role }}</span>
+              <span class="loc-chip">
+                <mat-icon>{{ (m.location ?? m.defaultLocation) === 'Office' ? 'business' : 'home' }}</mat-icon>
+                {{ m.location ?? m.defaultLocation }}
+              </span>
+            </div>
+          </div>
+          <div class="login-col" *ngIf="m.loginTime">
+            <span class="col-lbl">In</span>
+            <span class="col-val">{{ formatTime(m.loginTime) }}</span>
+          </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row" *ngIf="m.sessionStatus !== 'NotStarted'">
+          <div class="stat">
+            <span class="stat-lbl">Net Time</span>
+            <span class="stat-val primary">{{ formatDuration(m.netTimeMins) }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-lbl">Breaks</span>
+            <span class="stat-val warn">{{ formatDuration(m.breakDurationMins) }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-lbl">Earnings</span>
+            <span class="stat-val earn">{{ formatEarnings(m.earnings) }}</span>
+          </div>
+        </div>
+
+        <!-- Activity + Task -->
+        <div class="act-task-row" *ngIf="m.sessionStatus === 'Active' && m.currentActivity">
+          <div class="act-pill" [style.background]="activityColor(m.currentActivity) + '18'"
+                                [style.color]="activityColor(m.currentActivity)">
+            <mat-icon>{{ activityIcon(m.currentActivity) }}</mat-icon>
+            <span>{{ activityLabel(m.currentActivity) }}</span>
+            <span class="pill-elapsed">{{ elapsed(m.activityStartTime) }}</span>
+          </div>
+          <div class="task-line" *ngIf="m.currentTaskName">
+            <mat-icon>task_alt</mat-icon>
+            <span>{{ m.currentTaskName }}</span>
+          </div>
+          <div class="task-line muted" *ngIf="!m.currentTaskName && m.currentActivity === 'SystemWork'">
+            <mat-icon>task_alt</mat-icon> No task assigned
+          </div>
+        </div>
+
+        <div class="status-chip not-started" *ngIf="m.sessionStatus === 'NotStarted'">
+          <mat-icon>schedule</mat-icon> Not started
+        </div>
+        <div class="status-chip done" *ngIf="m.sessionStatus === 'Completed'">
+          <mat-icon>check_circle</mat-icon> Out at {{ formatTime(m.logoutTime) }}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Right: Details panel ────────────────────────────────────── -->
+    <div class="details-panel" #detailsPanel *ngIf="selectedMember">
+
+      <!-- Details loading -->
+      <div class="loading-wrap" *ngIf="detailsLoading">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+
+      <ng-container *ngIf="!detailsLoading">
+
+        <!-- Detail header -->
+        <div class="detail-header">
+          <div class="detail-avatar">{{ initials(selectedMember.displayName) }}</div>
+          <div>
+            <div class="detail-name">{{ selectedMember.displayName }}</div>
+            <div class="detail-sub">
+              <span class="role-badge" [class.manager]="selectedMember.role === 'Manager'">{{ selectedMember.role }}</span>
+              <span class="status-badge" [class.active]="selectedMember.sessionStatus === 'Active'"
+                                         [class.done]="selectedMember.sessionStatus === 'Completed'">
+                {{ selectedMember.sessionStatus }}
+              </span>
+              <span class="loc-chip">
+                <mat-icon>{{ (selectedMember.location ?? selectedMember.defaultLocation) === 'Office' ? 'business' : 'home' }}</mat-icon>
+                {{ selectedMember.location ?? selectedMember.defaultLocation }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- No session -->
+        <div class="empty-detail" *ngIf="!dayView?.session">
+          <mat-icon>event_busy</mat-icon>
+          <p>No workday session today</p>
+        </div>
+
+        <ng-container *ngIf="dayView?.session">
+
+          <!-- Attendance grid -->
+          <div class="detail-section" *ngIf="dayView?.attendance">
+            <div class="section-label"><mat-icon>schedule</mat-icon> Today's Summary</div>
+            <div class="att-grid">
+              <div class="att-cell">
+                <span class="att-lbl">Login</span>
+                <span class="att-val">{{ formatTime(dayView!.attendance!.loginTime) }}</span>
+              </div>
+              <div class="att-cell">
+                <span class="att-lbl">Logout</span>
+                <span class="att-val">{{ formatTime(dayView!.attendance!.logoutTime) }}</span>
+              </div>
+              <div class="att-cell">
+                <span class="att-lbl">Duration</span>
+                <span class="att-val">{{ formatDuration(dayView!.attendance!.totalDurationMins) }}</span>
+              </div>
+              <div class="att-cell">
+                <span class="att-lbl">Breaks</span>
+                <span class="att-val warn">{{ formatDuration(dayView!.attendance!.breakDurationMins) }}</span>
+              </div>
+              <div class="att-cell">
+                <span class="att-lbl">Net Time</span>
+                <span class="att-val primary">{{ formatDuration(dayView!.attendance!.netTimeMins) }}</span>
+              </div>
+              <div class="att-cell">
+                <span class="att-lbl">Earnings</span>
+                <span class="att-val earn">{{ formatEarnings(dayView!.attendance!.earnings) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current activity highlight -->
+          <div class="current-act-banner" *ngIf="dayView?.currentActivity">
+            <div class="cur-icon" [style.background]="activityColor(dayView!.currentActivity!.activityType) + '22'">
+              <mat-icon [style.color]="activityColor(dayView!.currentActivity!.activityType)">
+                {{ activityIcon(dayView!.currentActivity!.activityType) }}
+              </mat-icon>
+            </div>
+            <div class="cur-info">
+              <span class="cur-label" [style.color]="activityColor(dayView!.currentActivity!.activityType)">
+                {{ activityLabel(dayView!.currentActivity!.activityType) }}
+              </span>
+              <span class="cur-sub" *ngIf="dayView!.currentActivity!.taskName">
+                {{ dayView!.currentActivity!.taskName }}
+              </span>
+              <span class="cur-elapsed">Since {{ formatTime(dayView!.currentActivity!.startTime) }} · {{ elapsed(dayView!.currentActivity!.startTime) }}</span>
+            </div>
+            <span class="live-badge">LIVE</span>
+          </div>
+
+          <!-- Work history -->
+          <div class="detail-section" *ngIf="workActivities.length > 0">
+            <div class="section-label"><mat-icon>computer</mat-icon> Work History</div>
+            <ng-container *ngFor="let grp of taskGroups">
+              <div class="task-group-header" *ngIf="grp.taskId">
+                <mat-icon>task_alt</mat-icon>
+                {{ grp.taskName ?? 'Task #' + grp.taskId }}
+              </div>
+              <div class="act-row" *ngFor="let act of grp.activities">
+                <div class="act-dot" [style.background]="act.endTime ? '#10b981' : '#f59e0b'"></div>
+                <span class="act-time">{{ formatTime(act.startTime) }}</span>
+                <span class="act-arrow">→</span>
+                <span class="act-time">{{ act.endTime ? formatTime(act.endTime) : 'now' }}</span>
+                <span class="act-dur">{{ formatDuration(act.durationMinutes) }}</span>
+                <span class="act-loc-sm">{{ act.location }}</span>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Break history -->
+          <div class="detail-section" *ngIf="breakActivities.length > 0">
+            <div class="section-label"><mat-icon>pause_circle</mat-icon> Breaks</div>
+            <div class="act-row break-row" *ngFor="let act of breakActivities">
+              <div class="act-dot" [style.background]="activityColor(act.activityType)"></div>
+              <span class="break-name" [style.color]="activityColor(act.activityType)">
+                {{ activityLabel(act.activityType) }}
+              </span>
+              <span class="act-time">{{ formatTime(act.startTime) }}</span>
+              <span class="act-arrow">→</span>
+              <span class="act-time">{{ act.endTime ? formatTime(act.endTime) : 'now' }}</span>
+              <span class="act-dur">{{ formatDuration(act.durationMinutes) }}</span>
+            </div>
+          </div>
+
+        </ng-container>
+      </ng-container>
+    </div>
+
+    <!-- Placeholder when nothing selected -->
+    <div class="no-selection" *ngIf="!selectedMember">
+      <mat-icon>touch_app</mat-icon>
+      <p>Select an employee to view details</p>
+    </div>
+
+  </div>
+
+  <!-- ── Table view ──────────────────────────────────────────────────── -->
+  <div class="table-wrap" *ngIf="!loading && viewMode === 'table'">
+    <table class="emp-table">
+      <thead>
+        <tr>
+          <th class="th-expand"></th>
+          <th>Employee</th>
+          <th>Status</th>
+          <th>Location</th>
+          <th>Login</th>
+          <th>Net Time</th>
+          <th>Breaks</th>
+          <th>Earnings</th>
+          <th>Current Activity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let m of members">
+
+          <!-- Main row -->
+          <tr class="emp-row" [class.expanded]="expandedRows.has(m.userId)" (click)="toggleTableRow(m)">
+            <td class="td-expand">
+              <mat-icon>{{ expandedRows.has(m.userId) ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </td>
+            <td>
+              <div class="t-name-cell">
+                <div class="t-avatar" [style.color]="statusDot(m.sessionStatus)">{{ initials(m.displayName) }}</div>
+                <div>
+                  <div class="t-name">{{ m.displayName }}</div>
+                  <span class="role-badge" [class.manager]="m.role === 'Manager'">{{ m.role }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="t-status-cell">
+                <span class="t-status-dot" [style.background]="statusDot(m.sessionStatus)"></span>
+                {{ m.sessionStatus }}
+              </div>
+            </td>
+            <td>
+              <span class="t-loc">
+                <mat-icon>{{ (m.location ?? m.defaultLocation) === 'Office' ? 'business' : 'home' }}</mat-icon>
+                {{ m.location ?? m.defaultLocation }}
+              </span>
+            </td>
+            <td class="td-mono">{{ formatTime(m.loginTime) }}</td>
+            <td class="td-mono primary">{{ formatDuration(m.netTimeMins) }}</td>
+            <td class="td-mono warn">{{ formatDuration(m.breakDurationMins) }}</td>
+            <td class="td-mono earn">{{ formatEarnings(m.earnings) }}</td>
+            <td>
+              <div class="t-act-col" *ngIf="m.currentActivity; else noAct">
+                <div class="t-act-pill"
+                     [style.background]="activityColor(m.currentActivity) + '18'"
+                     [style.color]="activityColor(m.currentActivity)">
+                  <mat-icon>{{ activityIcon(m.currentActivity) }}</mat-icon>
+                  <span>{{ activityLabel(m.currentActivity) }}</span>
+                  <span class="t-elapsed">{{ elapsed(m.activityStartTime) }}</span>
+                </div>
+                <div class="t-task-line" *ngIf="m.currentTaskName">
+                  <mat-icon>task_alt</mat-icon>{{ m.currentTaskName }}
+                </div>
+              </div>
+              <ng-template #noAct><span class="t-none">—</span></ng-template>
+            </td>
+          </tr>
+
+          <!-- Expanded detail row -->
+          <tr class="detail-row" *ngIf="expandedRows.has(m.userId)">
+            <td colspan="9">
+
+              <div class="detail-row-loading" *ngIf="tableRowLoading.has(m.userId)">
+                <mat-spinner diameter="24"></mat-spinner>
+              </div>
+
+              <ng-container *ngIf="!tableRowLoading.has(m.userId) && tableRowDayView(m.userId) as dv">
+
+                <!-- No session -->
+                <div class="dr-empty" *ngIf="!dv.session">
+                  <mat-icon>event_busy</mat-icon> No session today
+                </div>
+
+                <div class="detail-row-body" *ngIf="dv.session">
+
+                  <!-- Attendance summary -->
+                  <div class="dr-section" *ngIf="dv.attendance">
+                    <div class="dr-label"><mat-icon>schedule</mat-icon> Today's Summary</div>
+                    <div class="dr-att-grid">
+                      <div class="dr-cell"><span class="dr-lbl">Login</span><span class="dr-val">{{ formatTime(dv.attendance.loginTime) }}</span></div>
+                      <div class="dr-cell"><span class="dr-lbl">Logout</span><span class="dr-val">{{ formatTime(dv.attendance.logoutTime) }}</span></div>
+                      <div class="dr-cell"><span class="dr-lbl">Duration</span><span class="dr-val">{{ formatDuration(dv.attendance.totalDurationMins) }}</span></div>
+                      <div class="dr-cell"><span class="dr-lbl">Breaks</span><span class="dr-val warn">{{ formatDuration(dv.attendance.breakDurationMins) }}</span></div>
+                      <div class="dr-cell"><span class="dr-lbl">Net Time</span><span class="dr-val primary">{{ formatDuration(dv.attendance.netTimeMins) }}</span></div>
+                      <div class="dr-cell"><span class="dr-lbl">Earnings</span><span class="dr-val earn">{{ formatEarnings(dv.attendance.earnings) }}</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Current activity -->
+                  <div class="dr-section" *ngIf="dv.currentActivity">
+                    <div class="dr-label"><mat-icon>radio_button_checked</mat-icon> Live Now</div>
+                    <div class="cur-act-row">
+                      <div class="t-act-pill"
+                           [style.background]="activityColor(dv.currentActivity.activityType) + '18'"
+                           [style.color]="activityColor(dv.currentActivity.activityType)">
+                        <mat-icon>{{ activityIcon(dv.currentActivity.activityType) }}</mat-icon>
+                        {{ activityLabel(dv.currentActivity.activityType) }}
+                      </div>
+                      <span class="cur-task" *ngIf="dv.currentActivity.taskName">{{ dv.currentActivity.taskName }}</span>
+                      <span class="cur-since">Since {{ formatTime(dv.currentActivity.startTime) }} · {{ elapsed(dv.currentActivity.startTime) }}</span>
+                      <span class="live-badge">LIVE</span>
+                    </div>
+                  </div>
+
+                  <!-- Work history -->
+                  <div class="dr-section" *ngIf="tableWorkActs(m.userId).length > 0">
+                    <div class="dr-label"><mat-icon>computer</mat-icon> Work History</div>
+                    <ng-container *ngFor="let grp of tableTaskGroups(m.userId)">
+                      <div class="task-group-header" *ngIf="grp.taskId">
+                        <mat-icon>task_alt</mat-icon>{{ grp.taskName ?? 'Task #' + grp.taskId }}
+                      </div>
+                      <div class="act-row" *ngFor="let act of grp.activities">
+                        <div class="act-dot" [style.background]="act.endTime ? '#10b981' : '#f59e0b'"></div>
+                        <span class="act-time">{{ formatTime(act.startTime) }}</span>
+                        <span class="act-arrow">→</span>
+                        <span class="act-time">{{ act.endTime ? formatTime(act.endTime) : 'now' }}</span>
+                        <span class="act-dur">{{ formatDuration(act.durationMinutes) }}</span>
+                        <span class="act-loc-sm">{{ act.location }}</span>
+                      </div>
+                    </ng-container>
+                  </div>
+
+                  <!-- Break history -->
+                  <div class="dr-section" *ngIf="tableBreakActs(m.userId).length > 0">
+                    <div class="dr-label"><mat-icon>pause_circle</mat-icon> Breaks</div>
+                    <div class="act-row break-row" *ngFor="let act of tableBreakActs(m.userId)">
+                      <div class="act-dot" [style.background]="activityColor(act.activityType)"></div>
+                      <span class="break-name" [style.color]="activityColor(act.activityType)">{{ activityLabel(act.activityType) }}</span>
+                      <span class="act-time">{{ formatTime(act.startTime) }}</span>
+                      <span class="act-arrow">→</span>
+                      <span class="act-time">{{ act.endTime ? formatTime(act.endTime) : 'now' }}</span>
+                      <span class="act-dur">{{ formatDuration(act.durationMinutes) }}</span>
+                    </div>
+                  </div>
+
+                </div>
+              </ng-container>
+
+            </td>
+          </tr>
+
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+</div>
