@@ -6,6 +6,7 @@ import {
   DEMO_CONTACTS,
   DEMO_PHONES,
   DEMO_VARIANTS,
+  DEMO_TEAM_MEMBERS,
 } from './demo.data';
 import { ItemDetailModel, ItemModel } from '../services/items.service';
 
@@ -25,11 +26,19 @@ export const demoInterceptor: HttpInterceptorFn = (req, next) => {
   // ── Auth ──────────────────────────────────────────────────────────────────
   // POST /auth/login
   if (method === 'POST' && url.includes('/auth/login')) {
-    return ok({
-      success: true,
-      message: 'Login successful',
-      user: { userId: 1, username: 'demo', email: 'demo@dclutter.app', displayName: 'Demo User' },
-    });
+    const body = req.body as { username?: string; password?: string };
+    const u = (body?.username ?? '').toLowerCase().trim();
+    const p = (body?.password ?? '').trim();
+    if ((u === 'employee1@dc.com' || u === 'employee1') && p === 'dce1') {
+      return ok({ success: true, message: 'Login successful', user: { userId: 2, username: 'employee1@dc.com', email: 'employee1@dc.com', displayName: 'Ravi Kumar', role: 'Employee', hourlyRate: 200, defaultLocation: 'Office' } });
+    }
+    if ((u === 'employee2@dc.com' || u === 'employee2') && p === 'dce2') {
+      return ok({ success: true, message: 'Login successful', user: { userId: 3, username: 'employee2@dc.com', email: 'employee2@dc.com', displayName: 'Preethi Nair', role: 'Employee', hourlyRate: 180, defaultLocation: 'Home' } });
+    }
+    if ((u === 'manager@dc.com' || u === 'manager' || u === 'demo') && (p === 'dcm' || p === 'demo')) {
+      return ok({ success: true, message: 'Login successful', user: { userId: 1, username: 'manager@dc.com', email: 'manager@dc.com', displayName: 'Demo Manager', role: 'Manager', hourlyRate: 249, defaultLocation: 'Office' } });
+    }
+    return ok({ success: false, message: 'Invalid email or password.' });
   }
 
   // ── Items ─────────────────────────────────────────────────────────────────
@@ -219,6 +228,59 @@ export const demoInterceptor: HttpInterceptorFn = (req, next) => {
   // GET /lists/{userId}
   if (method === 'GET' && /\/lists\/\d+$/.test(url)) {
     return ok({ success: true, lists: DemoStore.lists, message: '' });
+  }
+
+  // ── Workday ───────────────────────────────────────────────────────────────
+
+  if (method === 'POST' && url.includes('/workday/start')) {
+    const body = req.body as { userId?: number; location?: string };
+    const session = DemoStore.startWorkday(body.userId ?? 1, (body.location ?? 'Office') as 'Office' | 'Home');
+    return ok({ success: true, sessionId: session.sessionId });
+  }
+
+  if (method === 'POST' && /\/workday\/\d+\/end/.test(url)) {
+    const sessionId = +url.match(/\/workday\/(\d+)\/end/)![1];
+    DemoStore.endWorkday(sessionId);
+    return ok({ success: true });
+  }
+
+  if (method === 'POST' && /\/workday\/\d+\/activity/.test(url)) {
+    const sessionId = +url.match(/\/workday\/(\d+)\/activity/)![1];
+    const body = req.body as { activityType?: string; taskId?: number };
+    const act = DemoStore.changeActivity(sessionId, (body.activityType ?? 'SystemWork') as 'SystemWork' | 'LunchBreak' | 'CoffeeBreak' | 'ScreenLock' | 'PersonalBreak', body.taskId);
+    return ok({ success: true, workActivityId: act.workActivityId });
+  }
+
+  if (method === 'GET' && /\/workday\/team\/\d+\/live/.test(url)) {
+    const managerId = +url.match(/\/workday\/team\/(\d+)/)![1];
+    return ok({ success: true, members: DemoStore.getTeamLiveStatus(managerId) });
+  }
+
+  if (method === 'GET' && /\/workday\/team\/\d+\/attendance/.test(url)) {
+    const params = new URL(url, 'http://x').searchParams;
+    const period = params.get('period') ?? 'day';
+    const date   = params.get('date')   ?? new Date().toISOString().split('T')[0];
+    const memberId = params.get('memberId') ? +params.get('memberId')! : undefined;
+    const managerId = +url.match(/\/workday\/team\/(\d+)/)![1];
+    return ok({ success: true, records: DemoStore.getTeamAttendance(managerId, period, date, memberId) });
+  }
+
+  if (method === 'GET' && /\/workday\/team\/\d+$/.test(url)) {
+    return ok({ success: true, members: DEMO_TEAM_MEMBERS });
+  }
+
+  if (method === 'GET' && /\/workday\/attendance\/\d+/.test(url)) {
+    const userId = +url.match(/\/workday\/attendance\/(\d+)/)![1];
+    const params = new URL(url, 'http://x').searchParams;
+    const period = params.get('period') ?? 'month';
+    const date   = params.get('date')   ?? new Date().toISOString().split('T')[0];
+    return ok({ success: true, records: DemoStore.getAttendance(userId, period, date) });
+  }
+
+  if (method === 'GET' && /\/workday\/day\/\d+/.test(url)) {
+    const userId = +url.match(/\/workday\/day\/(\d+)/)![1];
+    const date   = new URL(url, 'http://x').searchParams.get('date') ?? new Date().toISOString().split('T')[0];
+    return ok(DemoStore.getWorkdayView(userId, date));
   }
 
   // ── Pass-through (should not happen in demo mode) ─────────────────────────

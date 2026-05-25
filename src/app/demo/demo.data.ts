@@ -1,6 +1,7 @@
 import { ItemModel, ItemDetailModel, ItemType, ItemVariant, ContactModel, PhoneModel } from '../services/items.service';
 import { ActivityItem } from '../services/activity.service';
 import { ListItem } from '../services/lists.service';
+import { WorkdaySession, WorkActivity, AttendanceSummary, TeamMember, TeamMemberLiveStatus, ActivityType, WorkLocation } from '../services/workday.service';
 
 // ─── Seed dates ──────────────────────────────────────────────────────────────
 function d(offset: number): string {
@@ -215,6 +216,93 @@ export const DEMO_LIST_ITEMS: Record<number, number[]> = {
   5: [47, 48, 49, 50],              // May Expenses
 };
 
+// ─── Workday helpers ──────────────────────────────────────────────────────────
+
+function dt(dateStr: string, timeStr: string): string {
+  return new Date(`${dateStr}T${timeStr}:00`).toISOString();
+}
+
+function diffMins(start: string, end: string): number {
+  return Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000);
+}
+
+function computeAttendance(session: WorkdaySession, activities: WorkActivity[], hourlyRate: number) {
+  const endTime = session.logoutTime ?? new Date().toISOString();
+  const totalDurationMins = diffMins(session.loginTime, endTime);
+  const breakDurationMins = activities
+    .filter(a => a.activityType !== 'SystemWork' && a.endTime)
+    .reduce((s, a) => s + (a.durationMinutes ?? 0), 0);
+  const netTimeMins = Math.max(0, totalDurationMins - breakDurationMins);
+  const earnings = Math.round((netTimeMins / 60) * hourlyRate);
+  return { totalDurationMins, breakDurationMins, netTimeMins, earnings };
+}
+
+// ─── Workday seed data ────────────────────────────────────────────────────────
+
+const WD_DATES = {
+  today: '2026-05-25',
+  fri:   '2026-05-23',
+  thu:   '2026-05-22',
+  wed:   '2026-05-21',
+  tue:   '2026-05-20',
+  mon:   '2026-05-19',
+};
+
+const HOURLY_RATE_U1 = 249;
+const HOURLY_RATE_U2 = 200;
+const HOURLY_RATE_U3 = 180;
+
+function buildDayActivities(
+  sessionId: number, userId: number, dateStr: string,
+  startId: number, taskId: number, loc: WorkLocation
+): WorkActivity[] {
+  let id = startId;
+  return [
+    { workActivityId: id++, sessionId, userId, activityType: 'SystemWork',  startTime: dt(dateStr, '09:31'), endTime: dt(dateStr, '10:45'), location: loc, durationMinutes: 74,  taskId, taskName: 'Fix DClutter Android keyboard push-up issue' },
+    { workActivityId: id++, sessionId, userId, activityType: 'ScreenLock',  startTime: dt(dateStr, '10:45'), endTime: dt(dateStr, '11:32'), location: loc, durationMinutes: 47 },
+    { workActivityId: id++, sessionId, userId, activityType: 'SystemWork',  startTime: dt(dateStr, '11:32'), endTime: dt(dateStr, '13:00'), location: loc, durationMinutes: 88,  taskId, taskName: 'Fix DClutter Android keyboard push-up issue' },
+    { workActivityId: id++, sessionId, userId, activityType: 'LunchBreak',  startTime: dt(dateStr, '13:00'), endTime: dt(dateStr, '13:45'), location: loc, durationMinutes: 45 },
+    { workActivityId: id++, sessionId, userId, activityType: 'SystemWork',  startTime: dt(dateStr, '13:45'), endTime: dt(dateStr, '15:20'), location: loc, durationMinutes: 95,  taskId, taskName: 'Fix DClutter Android keyboard push-up issue' },
+    { workActivityId: id++, sessionId, userId, activityType: 'CoffeeBreak', startTime: dt(dateStr, '15:20'), endTime: dt(dateStr, '15:35'), location: loc, durationMinutes: 15 },
+    { workActivityId: id++, sessionId, userId, activityType: 'SystemWork',  startTime: dt(dateStr, '15:35'), endTime: dt(dateStr, '18:00'), location: loc, durationMinutes: 145, taskId, taskName: 'Fix DClutter Android keyboard push-up issue' },
+  ];
+}
+
+const SESSION_TODAY: WorkdaySession = { sessionId: 1, userId: 1, sessionDate: WD_DATES.today, loginTime: dt(WD_DATES.today, '10:29'), location: 'Office', status: 'Active' };
+const ACTIVITIES_TODAY: WorkActivity[] = [
+  { workActivityId: 1, sessionId: 1, userId: 1, activityType: 'SystemWork',  startTime: dt(WD_DATES.today, '10:30'), endTime: dt(WD_DATES.today, '10:56'), location: 'Office', durationMinutes: 26, taskId: 45, taskName: 'Fix DClutter Android keyboard push-up issue' },
+  { workActivityId: 2, sessionId: 1, userId: 1, activityType: 'ScreenLock',  startTime: dt(WD_DATES.today, '10:56'), endTime: dt(WD_DATES.today, '11:49'), location: 'Office', durationMinutes: 53 },
+  { workActivityId: 3, sessionId: 1, userId: 1, activityType: 'SystemWork',  startTime: dt(WD_DATES.today, '11:50'), endTime: dt(WD_DATES.today, '13:05'), location: 'Office', durationMinutes: 75, taskId: 45, taskName: 'Fix DClutter Android keyboard push-up issue' },
+  { workActivityId: 4, sessionId: 1, userId: 1, activityType: 'LunchBreak',  startTime: dt(WD_DATES.today, '13:05'), endTime: dt(WD_DATES.today, '14:05'), location: 'Office', durationMinutes: 60 },
+  { workActivityId: 5, sessionId: 1, userId: 1, activityType: 'SystemWork',  startTime: dt(WD_DATES.today, '14:05'), endTime: dt(WD_DATES.today, '15:22'), location: 'Office', durationMinutes: 77, taskId: 43, taskName: 'Submit ITR for FY 2025-26' },
+  { workActivityId: 6, sessionId: 1, userId: 1, activityType: 'CoffeeBreak', startTime: dt(WD_DATES.today, '15:22'), endTime: dt(WD_DATES.today, '15:37'), location: 'Office', durationMinutes: 15 },
+  { workActivityId: 7, sessionId: 1, userId: 1, activityType: 'SystemWork',  startTime: dt(WD_DATES.today, '15:37'), location: 'Office', taskId: 43, taskName: 'Submit ITR for FY 2025-26' },
+];
+
+const SESSION_FRI: WorkdaySession = { sessionId: 2, userId: 1, sessionDate: WD_DATES.fri, loginTime: dt(WD_DATES.fri, '09:45'), logoutTime: dt(WD_DATES.fri, '18:30'), location: 'Office', status: 'Completed' };
+const SESSION_THU: WorkdaySession = { sessionId: 3, userId: 1, sessionDate: WD_DATES.thu, loginTime: dt(WD_DATES.thu, '10:00'), logoutTime: dt(WD_DATES.thu, '18:15'), location: 'Home',   status: 'Completed' };
+const SESSION_WED: WorkdaySession = { sessionId: 4, userId: 1, sessionDate: WD_DATES.wed, loginTime: dt(WD_DATES.wed, '09:30'), logoutTime: dt(WD_DATES.wed, '18:00'), location: 'Office', status: 'Completed' };
+const SESSION_TUE: WorkdaySession = { sessionId: 5, userId: 1, sessionDate: WD_DATES.tue, loginTime: dt(WD_DATES.tue, '10:15'), logoutTime: dt(WD_DATES.tue, '18:45'), location: 'Office', status: 'Completed' };
+const SESSION_MON: WorkdaySession = { sessionId: 6, userId: 1, sessionDate: WD_DATES.mon, loginTime: dt(WD_DATES.mon, '09:50'), logoutTime: dt(WD_DATES.mon, '18:20'), location: 'Home',   status: 'Completed' };
+
+const SESSION_U2_TODAY: WorkdaySession = { sessionId: 7,  userId: 2, sessionDate: WD_DATES.today, loginTime: dt(WD_DATES.today, '09:30'), location: 'Office', status: 'Active' };
+const SESSION_U2_FRI:   WorkdaySession = { sessionId: 8,  userId: 2, sessionDate: WD_DATES.fri,   loginTime: dt(WD_DATES.fri,   '09:00'), logoutTime: dt(WD_DATES.fri,   '17:30'), location: 'Office', status: 'Completed' };
+const SESSION_U2_THU:   WorkdaySession = { sessionId: 9,  userId: 2, sessionDate: WD_DATES.thu,   loginTime: dt(WD_DATES.thu,   '09:15'), logoutTime: dt(WD_DATES.thu,   '18:00'), location: 'Office', status: 'Completed' };
+const SESSION_U3_TODAY: WorkdaySession = { sessionId: 10, userId: 3, sessionDate: WD_DATES.today, loginTime: dt(WD_DATES.today, '10:00'), logoutTime: dt(WD_DATES.today, '17:30'), location: 'Home',   status: 'Completed' };
+const SESSION_U3_FRI:   WorkdaySession = { sessionId: 11, userId: 3, sessionDate: WD_DATES.fri,   loginTime: dt(WD_DATES.fri,   '09:30'), logoutTime: dt(WD_DATES.fri,   '17:00'), location: 'Home',   status: 'Completed' };
+
+const _U2_BASE = buildDayActivities(7, 2, WD_DATES.today, 200, 45, 'Office');
+const ACTIVITIES_U2_TODAY: WorkActivity[] = [
+  ..._U2_BASE.slice(0, 6),
+  { workActivityId: 206, sessionId: 7, userId: 2, activityType: 'PersonalBreak', startTime: dt(WD_DATES.today, '15:35'), location: 'Office' as WorkLocation },
+];
+
+export const DEMO_TEAM_MEMBERS: TeamMember[] = [
+  { userId: 1, displayName: 'Demo Manager', username: 'manager@dc.com',   role: 'Manager',  hourlyRate: HOURLY_RATE_U1, defaultLocation: 'Office' },
+  { userId: 2, displayName: 'Ravi Kumar',   username: 'employee1@dc.com', role: 'Employee', hourlyRate: HOURLY_RATE_U2, defaultLocation: 'Office' },
+  { userId: 3, displayName: 'Preethi Nair', username: 'employee2@dc.com', role: 'Employee', hourlyRate: HOURLY_RATE_U3, defaultLocation: 'Home'   },
+];
+
 // ─── Mutable demo store (supports create/update/delete in-session) ─────────────
 export class DemoStore {
   static items: ItemModel[]             = [...DEMO_ITEMS];
@@ -225,13 +313,33 @@ export class DemoStore {
   private static nextId = 1001;
   private static nextListId = 101;
 
+  static workdaySessions: WorkdaySession[] = [
+    SESSION_TODAY, SESSION_FRI, SESSION_THU, SESSION_WED, SESSION_TUE, SESSION_MON,
+    SESSION_U2_TODAY, SESSION_U2_FRI, SESSION_U2_THU,
+    SESSION_U3_TODAY, SESSION_U3_FRI,
+  ];
+  static workActivities: WorkActivity[] = [
+    ...ACTIVITIES_TODAY,
+    ...buildDayActivities(2, 1, WD_DATES.fri, 100, 45, 'Office'),
+    ...buildDayActivities(3, 1, WD_DATES.thu, 110, 43, 'Home'),
+    ...buildDayActivities(4, 1, WD_DATES.wed, 120, 45, 'Office'),
+    ...buildDayActivities(5, 1, WD_DATES.tue, 130, 43, 'Office'),
+    ...buildDayActivities(6, 1, WD_DATES.mon, 140, 45, 'Home'),
+    ...ACTIVITIES_U2_TODAY,
+    ...buildDayActivities(8,  2, WD_DATES.fri, 210, 45, 'Office'),
+    ...buildDayActivities(9,  2, WD_DATES.thu, 220, 43, 'Office'),
+    ...buildDayActivities(10, 3, WD_DATES.today, 300, 43, 'Home'),
+    ...buildDayActivities(11, 3, WD_DATES.fri,   310, 45, 'Home'),
+  ];
+  private static nextSessionId = 50;
+  private static nextActivityId = 500;
+
   static nextItemId(): number { return this.nextId++; }
   static nextNewListId(): number { return this.nextListId++; }
 
   static addItem(item: ItemModel, detail: ItemDetailModel): void {
     this.items.unshift(item);
     this.details[item.itemId] = detail;
-    // Update type count
     const type = DEMO_ITEM_TYPES.find(t => t.itemTypeId === item.itemTypeId);
     if (type) type.count++;
   }
@@ -260,7 +368,6 @@ export class DemoStore {
       const type = DEMO_ITEM_TYPES.find(t => t.itemTypeId === item.itemTypeId);
       if (type && type.count > 0) type.count--;
     }
-    // Remove from any list
     Object.keys(this.listItems).forEach(k => {
       this.listItems[+k] = this.listItems[+k].filter(id2 => id2 !== id);
     });
@@ -289,11 +396,100 @@ export class DemoStore {
   }
 
   static getTypeCounts(): ItemType[] {
-    // Build fresh counts from current items
     const map = new Map<number, number>();
     this.items.forEach(i => {
       if (i.itemTypeId != null) map.set(i.itemTypeId, (map.get(i.itemTypeId) ?? 0) + 1);
     });
     return DEMO_ITEM_TYPES.map(t => ({ ...t, count: map.get(t.itemTypeId) ?? 0 })).filter(t => t.count > 0);
+  }
+
+  // ── Workday ───────────────────────────────────────────────────────────────
+
+  static getWorkdayView(userId: number, date: string) {
+    const session = this.workdaySessions
+      .filter(s => s.userId === userId && s.sessionDate === date)
+      .sort((a, b) => b.sessionId - a.sessionId)[0];
+    if (!session) return { success: true, workHistory: [] };
+    const acts = this.workActivities.filter(a => a.sessionId === session.sessionId);
+    const completed = acts.filter(a => a.endTime != null);
+    const currentActivity = session.status === 'Active' ? acts.find(a => !a.endTime) : undefined;
+    const member = DEMO_TEAM_MEMBERS.find(m => m.userId === userId);
+    const rate = member?.hourlyRate ?? 249;
+    const { totalDurationMins, breakDurationMins, netTimeMins, earnings } = computeAttendance(session, completed, rate);
+    return { success: true, session, attendance: { loginTime: session.loginTime, logoutTime: session.logoutTime, totalDurationMins, breakDurationMins, netTimeMins, earnings }, currentActivity, workHistory: completed };
+  }
+
+  static startWorkday(userId: number, location: WorkLocation): WorkdaySession {
+    const today = new Date().toISOString().split('T')[0];
+    this.workdaySessions.filter(s => s.userId === userId && s.status === 'Active')
+      .forEach(s => { s.status = 'Completed'; s.logoutTime = new Date().toISOString(); });
+    const session: WorkdaySession = { sessionId: ++this.nextSessionId, userId, sessionDate: today, loginTime: new Date().toISOString(), location, status: 'Active' };
+    this.workdaySessions.push(session);
+    this.workActivities.push({ workActivityId: ++this.nextActivityId, sessionId: session.sessionId, userId, activityType: 'SystemWork', startTime: new Date().toISOString(), location });
+    return session;
+  }
+
+  static endWorkday(sessionId: number): void {
+    const session = this.workdaySessions.find(s => s.sessionId === sessionId);
+    if (!session) return;
+    const now = new Date().toISOString();
+    session.status = 'Completed'; session.logoutTime = now;
+    const open = this.workActivities.find(a => a.sessionId === sessionId && !a.endTime);
+    if (open) { open.endTime = now; open.durationMinutes = Math.round((new Date(now).getTime() - new Date(open.startTime).getTime()) / 60000); }
+  }
+
+  static changeActivity(sessionId: number, activityType: ActivityType, taskId?: number): WorkActivity {
+    const session = this.workdaySessions.find(s => s.sessionId === sessionId);
+    const now = new Date().toISOString();
+    const open = this.workActivities.find(a => a.sessionId === sessionId && !a.endTime);
+    if (open) { open.endTime = now; open.durationMinutes = Math.round((new Date(now).getTime() - new Date(open.startTime).getTime()) / 60000); }
+    const act: WorkActivity = { workActivityId: ++this.nextActivityId, sessionId, userId: session?.userId ?? 1, activityType, startTime: now, location: session?.location ?? 'Office', taskId };
+    this.workActivities.push(act);
+    return act;
+  }
+
+  static getAttendance(userId: number, period: string, date: string): AttendanceSummary[] {
+    const member = DEMO_TEAM_MEMBERS.find(m => m.userId === userId);
+    const rate = member?.hourlyRate ?? 249;
+    return this.workdaySessions
+      .filter(s => s.userId === userId && this.inPeriod(s.sessionDate, period, date))
+      .sort((a, b) => b.sessionDate.localeCompare(a.sessionDate))
+      .map(s => {
+        const acts = this.workActivities.filter(a => a.sessionId === s.sessionId && a.endTime);
+        const { totalDurationMins, breakDurationMins, netTimeMins, earnings } = computeAttendance(s, acts, rate);
+        return { sessionId: s.sessionId, userId, userName: member?.displayName ?? 'User', sessionDate: s.sessionDate, loginTime: s.loginTime, logoutTime: s.logoutTime, location: s.location, totalDurationMins, breakDurationMins, netTimeMins, earnings, status: s.status } as AttendanceSummary;
+      });
+  }
+
+  static getTeamAttendance(managerId: number, period: string, date: string, memberId?: number): AttendanceSummary[] {
+    const userIds = memberId != null ? [memberId] : DEMO_TEAM_MEMBERS.map(m => m.userId);
+    return userIds.flatMap(uid => this.getAttendance(uid, period, date))
+      .sort((a, b) => b.sessionDate.localeCompare(a.sessionDate) || a.userId - b.userId);
+  }
+
+  static getTeamLiveStatus(_managerId: number): TeamMemberLiveStatus[] {
+    const today = new Date().toISOString().split('T')[0];
+    return DEMO_TEAM_MEMBERS.map(member => {
+      const session = this.workdaySessions
+        .filter(s => s.userId === member.userId && s.sessionDate === today)
+        .sort((a, b) => b.sessionId - a.sessionId)[0];
+      if (!session) return { userId: member.userId, displayName: member.displayName, role: member.role, defaultLocation: member.defaultLocation, sessionStatus: 'NotStarted' as const };
+      const allActs = this.workActivities.filter(a => a.sessionId === session.sessionId);
+      const completedActs = allActs.filter(a => a.endTime != null);
+      const currentActivity = session.status === 'Active' ? allActs.find(a => !a.endTime) : undefined;
+      const { netTimeMins, breakDurationMins, earnings } = computeAttendance(session, completedActs, member.hourlyRate);
+      return { userId: member.userId, displayName: member.displayName, role: member.role, defaultLocation: member.defaultLocation, sessionStatus: session.status === 'Active' ? 'Active' as const : 'Completed' as const, location: session.location, currentActivity: currentActivity?.activityType, activityStartTime: currentActivity?.startTime, currentTaskName: currentActivity?.taskName, loginTime: session.loginTime, logoutTime: session.logoutTime, netTimeMins, breakDurationMins, earnings };
+    });
+  }
+
+  private static inPeriod(sessionDate: string, period: string, refDate: string): boolean {
+    const d = new Date(sessionDate);
+    const ref = new Date(refDate);
+    if (period === 'day') return sessionDate === refDate;
+    if (period === 'week') {
+      const ws = (r: Date) => { const x = new Date(r); const diff = x.getDay() === 0 ? -6 : 1 - x.getDay(); x.setDate(x.getDate() + diff); x.setHours(0,0,0,0); return x.getTime(); };
+      return ws(d) === ws(ref);
+    }
+    return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
   }
 }

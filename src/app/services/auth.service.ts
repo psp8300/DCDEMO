@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface LoginRequest {
   username: string;
@@ -11,6 +13,9 @@ export interface UserInfo {
   username: string;
   email: string;
   displayName: string;
+  role?: 'Manager' | 'Employee';
+  hourlyRate?: number;
+  defaultLocation?: 'Office' | 'Home';
 }
 
 export interface LoginResponse {
@@ -19,21 +24,14 @@ export interface LoginResponse {
   user?: UserInfo;
 }
 
-const DEMO_USER: UserInfo = {
-  userId: 1,
-  username: 'demo',
-  email: 'demo@dclutter.app',
-  displayName: 'Demo User',
-};
-
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private apiUrl = environment.apiUrl;
+
+  constructor(private http: HttpClient) {}
 
   login(request: LoginRequest): Observable<LoginResponse> {
-    if (request.username.trim() && request.password.trim()) {
-      return of({ success: true, message: 'OK', user: DEMO_USER });
-    }
-    return of({ success: false, message: 'Please enter username and password.' });
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, request);
   }
 
   saveUser(user: UserInfo): void {
